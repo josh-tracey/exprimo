@@ -30,7 +30,8 @@ use censura::Evaluator;
 use std::collections::HashMap;
 
 let mut context = HashMap::new();
-context.insert("key", "value");
+context.insert("a".to_string(), serde_json::Value::Bool(true));        
+context.insert("b".to_string(), serde_json::Value::Bool(false));
 
 let evaluator = Evaluator::new(context);
 ```
@@ -38,8 +39,11 @@ let evaluator = Evaluator::new(context);
 Then, you can evaluate JavaScript expressions:
 
 ```rust
-let result = evaluator.evaluate("key == 'value'").unwrap();
+let result = evaluator.evaluate("a && b").unwrap();
 println!("The result is {}", result);
+
+//--outputs
+// >The result is false
 ```
 
 ## Examples
