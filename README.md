@@ -1,7 +1,7 @@
 # Exprimo
 
 Exprimo is a JavaScript evaluator written in Rust, inspired by the functionality of 
-angular-expression-js. Designed to be simple and blazingly fast.
+angular-expressions. Designed to be simple and blazingly fast.
 
 ## Description
 
