@@ -46,10 +46,6 @@ println!("The result is {}", result);
 // >The result is false
 ```
 
-## Examples
-
-Please see the `examples` directory in the GitHub repository for more usage examples.
-
 ## Contributing
 
 Contributions to Exprimo are welcome! Please submit a pull request on GitHub.
