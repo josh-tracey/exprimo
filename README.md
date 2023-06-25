@@ -1,6 +1,6 @@
 # Exprimo
 
-!! Beware of Sneaky Bugs in the Early Project Stages! 
+**CAUTION:** Beware of Sneaky Bugs in the Early Project Stages! 
 
 Exprimo is a JavaScript evaluator written in Rust, inspired by the functionality of 
 angular-expressions. Designed to be simple and blazingly fast.
