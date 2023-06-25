@@ -26,7 +26,7 @@ cargo install exprimo
 First, you need to import Exprimo and create an instance of `Evaluator`:
 
 ```rust
-use censura::Evaluator;
+use exprimo::Evaluator;
 use std::collections::HashMap;
 
 let mut context = HashMap::new();
