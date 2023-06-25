@@ -24,7 +24,7 @@ cargo add exprimo
 Trace logging to console can be added to the package, it is by default disabled as probably 
 don't need it unless working on it, or need to debug AST error if required.
 
-This will install Scribe Rust and will need LOG_LEVEL=TRACE in environment variables for logs to output.
+This will install [Scribe Rust](https://github.com/josh-tracey/scribe-rust) and will need LOG_LEVEL=TRACE in environment variables for logs to output.
 
 ```toml
 exprimo = { version = "*", features = ["logging"]
