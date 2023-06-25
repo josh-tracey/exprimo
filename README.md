@@ -1,29 +1,29 @@
-# Censura
+# Exprimo
 
-Censura is a JavaScript evaluator written in Rust, inspired by the functionality of 
+Exprimo is a JavaScript evaluator written in Rust, inspired by the functionality of 
 angular-expression-js. Designed to be simple and blazingly fast.
 
 ## Description
 
-Censura parses and evaluates JavaScript expressions efficiently and securely. 
+Exprimo parses and evaluates JavaScript expressions efficiently and securely. 
 It utilizes the power of Rust and its excellent memory safety guarantees to provide a reliable
 and fast JavaScript expression evaluator.
 
 ## Installation
 
-Before you can use Censura, you need to have Rust installed on your system. 
+Before you can use Exprimo, you need to have Rust installed on your system. 
 If you don't have it installed, you can download Rust from the official website 
 [here](https://www.rust-lang.org/tools/install).
 
-Once Rust is installed, you can install Censura by running:
+Once Rust is installed, you can install Exprimo by running:
 
 ```bash
-cargo install censura
+cargo install exprimo
 ```
 
 ## Usage
 
-First, you need to import Censura and create an instance of `Evaluator`:
+First, you need to import Exprimo and create an instance of `Evaluator`:
 
 ```rust
 use censura::Evaluator;
@@ -48,9 +48,9 @@ Please see the `examples` directory in the GitHub repository for more usage exam
 
 ## Contributing
 
-Contributions to Censura are welcome! Please submit a pull request on GitHub.
+Contributions to Exprimo are welcome! Please submit a pull request on GitHub.
 
 ## License
 
-Censura is licensed under the MIT license. Please see the `LICENSE` file in the GitHub 
+Exprimo is licensed under the MIT license. Please see the `LICENSE` file in the GitHub 
 repository for more information.
