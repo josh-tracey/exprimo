@@ -1,6 +1,6 @@
 [package]
 name = "exprimo"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "MIT"
 authors = ["joshua.tracey08@gmail.com"]
