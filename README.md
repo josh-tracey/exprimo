@@ -21,6 +21,15 @@ Once Rust is installed, you can install Exprimo by running:
 cargo add exprimo
 ```
 
+Trace logging to console can be added to the package, it is by default disabled as probably 
+don't need it unless working on it, or need to debug AST error if required.
+
+This will install Scribe Rust and will need LOG_LEVEL=TRACE in environment variables for logs to output.
+
+```toml
+exprimo = { version = "*", features = ["logging"]
+```
+
 ## Usage
 
 First, you need to import Exprimo and create an instance of `Evaluator`:
