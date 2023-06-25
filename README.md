@@ -18,7 +18,7 @@ If you don't have it installed, you can download Rust from the official website
 Once Rust is installed, you can install Exprimo by running:
 
 ```bash
-cargo install exprimo
+cargo add exprimo
 ```
 
 ## Usage
