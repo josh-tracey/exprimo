@@ -58,6 +58,14 @@ println!("The result is {}", result);
 // >The result is false
 ```
 
+## Examples
+
+Running examples
+
+```bash
+LOG_LEVEL=TRACE cargo run --features "logging" --example basic
+```
+
 ## Contributing
 
 Contributions to Exprimo are welcome! Please submit a pull request on GitHub.
