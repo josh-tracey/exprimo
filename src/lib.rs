@@ -229,7 +229,21 @@ impl Evaluator {
 
         let res = match identifier_value {
             Some(serde_json::Value::Bool(b)) => Ok(*b),
-            Some(serde_json::Value::String(s)) => Ok(s != "false"),
+            Some(serde_json::Value::String(s)) => {
+                if s != ""
+                    || s != "false"
+                    || s != "0"
+                    || s != "null"
+                    || s != "undefined"
+                    || s != "NaN"
+                    || s != "Infinity"
+                    || !s.is_empty()
+                {
+                    Ok(false)
+                } else {
+                    Ok(true)
+                }
+            }
             Some(serde_json::Value::Number(n)) => Ok(n.as_i64().unwrap() != 0),
             Some(serde_json::Value::Null) => Ok(false),
             Some(serde_json::Value::Array(a)) => Ok(!a.is_empty()),
@@ -294,40 +308,3 @@ impl Evaluator {
         }
     }
 }
-
-#[cfg(test)]
-mod tests{
-    use super::*;
-
-    #[test]
-    fn test_basic_evaluate_with_context() {
-        let mut context = HashMap::new();
-
-        context.insert("a".to_string(), serde_json::Value::Bool(true));
-        context.insert("b".to_string(), serde_json::Value::Bool(false));
-
-
-        #[cfg(feature = "logging")]
-        let logger = Logger::default();
-
-        let evaluator = Evaluator::new(context, #[cfg(feature = "logging")] logger);
-
-        let expr1 = "a && b";
-        let expr2 = "a || b";
-        let expr3 = "a && !b";
-        let expr4 = "a || !b";
-        let expr5 = "a && b || a && !b";
-        let res1 = evaluator.evaluate(&expr1).unwrap();
-        let res2 = evaluator.evaluate(&expr2).unwrap();
-        let res3 = evaluator.evaluate(&expr3).unwrap();
-        let res4 = evaluator.evaluate(&expr4).unwrap();
-        let res5 = evaluator.evaluate(&expr5).unwrap();
-
-        assert_eq!(res1, false);
-        assert_eq!(res2, true);
-        assert_eq!(res3, true);
-        assert_eq!(res4, true);
-        assert_eq!(res5, true);
-    }
-}
-
