@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use exprimo::Evaluator;
 
+#[cfg(feature = "logging")]
+use scribe_rust::Logger;
+
 #[cfg(test)]
 
     #[test]

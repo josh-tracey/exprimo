@@ -5,6 +5,7 @@ use rslint_parser::{
 
 #[cfg(feature = "logging")]
 use scribe_rust::Logger;
+use serde_json::Value;
 
 #[cfg(feature = "logging")]
 use std::sync::Arc;
@@ -188,36 +189,20 @@ impl Evaluator {
             dot_expr.to_string()
         ));
         let mut left = dot_expr.clone().syntax().clone();
-        let mut right = dot_expr.prop().unwrap().ident_token().unwrap().to_string();
 
-        let mut left_value = self.evaluate_node(&left)?;
+        #[cfg(feature = "logging")]
+        self.logger
+            .trace(&format!("DotExpr left {}", left.to_string()));
 
-        while let SyntaxKind::DOT_EXPR = left.clone().kind() {
-            if let Some(parent) = left.clone().parent() {
-                left = parent.clone();
-                if let Some(dot_expr) = parent.try_to::<DotExpr>() {
-                    let property = dot_expr.prop().unwrap().ident_token().unwrap();
-                    right = format!("{}.{}", property, right);
-                    left_value = self.evaluate_node(&left)?;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
+        while let Some(child) = left.child_with_kind(SyntaxKind::DOT_EXPR) {
+            let dot_expr = child.try_to::<DotExpr>().unwrap();
+            #[cfg(feature = "logging")]
+            self.logger
+                .trace(&format!("DotExpr child_expr {}", dot_expr.to_string()));
+            left = dot_expr.clone().syntax().clone();
         }
 
-        match left_value {
-            true => {
-                let property_value = self.context.get(&right);
-
-                match property_value {
-                    Some(value) => Ok(value == "true"),
-                    None => Err(Box::from("Property not found in context.")),
-                }
-            }
-            false => Ok(false),
-        }
+        self.evaluate_by_name(left.first_token().unwrap().to_string())
     }
 
     fn evaluate_by_name(&self, identifier_name: String) -> Result<bool, Box<dyn Error>> {
@@ -230,7 +215,12 @@ impl Evaluator {
         let res = match identifier_value {
             Some(serde_json::Value::Bool(b)) => Ok(*b),
             Some(serde_json::Value::String(s)) => {
-                if s != ""
+                if s.contains('{') && s.contains('}') {
+                    match serde_json::from_str::<Value>(s) {
+                        Ok(v) => Ok(v.to_string() == "true"),
+                        Err(_) => Ok(false),
+                    }
+                } else if s != ""
                     || s != "false"
                     || s != "0"
                     || s != "null"
@@ -261,6 +251,16 @@ impl Evaluator {
         self.logger
             .trace(&format!("Evaluating Name: {:#?}", name.to_string()));
         let identifier_name = name.ident_token().unwrap().to_string();
+
+        if identifier_name == "undefined"
+            || identifier_name == "NaN"
+            || identifier_name == "Infinity"
+            || identifier_name == "null"
+            || identifier_name == ""
+        {
+            return Ok(false);
+        }
+
         self.evaluate_by_name(identifier_name)
     }
 
@@ -271,6 +271,16 @@ impl Evaluator {
             name_ref.to_string()
         ));
         let identifier_name = name_ref.ident_token().unwrap().to_string();
+
+        if identifier_name == "undefined"
+            || identifier_name == "NaN"
+            || identifier_name == "Infinity"
+            || identifier_name == "null"
+            || identifier_name == ""
+        {
+            return Ok(false);
+        }
+
         self.evaluate_by_name(identifier_name)
     }
 
@@ -281,6 +291,16 @@ impl Evaluator {
             identifier.to_string()
         ));
         let identifier_name = identifier.to_string();
+
+        if identifier_name == "undefined"
+            || identifier_name == "NaN"
+            || identifier_name == "Infinity"
+            || identifier_name == "null"
+            || identifier_name == ""
+        {
+            return Ok(false);
+        }
+
         self.evaluate_by_name(identifier_name)
     }
 
