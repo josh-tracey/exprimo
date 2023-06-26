@@ -41,16 +41,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "censura"
-version = "0.1.0"
-dependencies = [
- "rslint_parser",
- "scribe-rust",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -75,6 +65,16 @@ checksum = "5f11890ce181d47a64e5d1eb4b6caba0e7bae911a356723740d058a5d0340b7d"
 dependencies = [
  "autocfg",
  "scopeguard",
+]
+
+[[package]]
+name = "exprimo"
+version = "0.1.3"
+dependencies = [
+ "rslint_parser",
+ "scribe-rust",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

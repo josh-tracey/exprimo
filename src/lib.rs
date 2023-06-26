@@ -227,11 +227,19 @@ impl Evaluator {
         self.logger
             .trace(&format!("Identifier Value: {:#?}", identifier_value));
 
-        match identifier_value {
+        let res = match identifier_value {
             Some(serde_json::Value::Bool(b)) => Ok(*b),
-            Some(_) => Err(Box::from("Identifier value is not a boolean.")),
+            Some(serde_json::Value::String(s)) => Ok(s != "false"),
+            Some(serde_json::Value::Number(n)) => Ok(n.as_i64().unwrap() != 0),
+            Some(serde_json::Value::Null) => Ok(false),
+            Some(serde_json::Value::Array(a)) => Ok(!a.is_empty()),
+            Some(serde_json::Value::Object(_)) => Ok(true),
             None => Err(Box::from("Identifier not found in context.")),
-        }
+        };
+
+        #[cfg(feature = "logging")]
+        self.logger.trace(&format!("Identifier Result: {:?}", res));
+        res
     }
 
     fn evaluate_name(&self, name: &Name) -> Result<bool, Box<dyn Error>> {
@@ -294,7 +302,7 @@ mod tests{
     #[test]
     fn test_basic_evaluate_with_context() {
         let mut context = HashMap::new();
-        
+
         context.insert("a".to_string(), serde_json::Value::Bool(true));
         context.insert("b".to_string(), serde_json::Value::Bool(false));
 
@@ -304,7 +312,7 @@ mod tests{
 
         let evaluator = Evaluator::new(context, #[cfg(feature = "logging")] logger);
 
-        let expr1 = "a && b"; 
+        let expr1 = "a && b";
         let expr2 = "a || b";
         let expr3 = "a && !b";
         let expr4 = "a || !b";
@@ -321,6 +329,5 @@ mod tests{
         assert_eq!(res4, true);
         assert_eq!(res5, true);
     }
-
 }
 
