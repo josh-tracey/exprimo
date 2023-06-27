@@ -17,7 +17,7 @@ pub fn add_context(key: &str, json_str: &str, context: &mut HashMap<String, Stri
     let context_obj = context.entry(key.to_string()).or_insert_with(String::new);
     let nested_obj = build_nested_object(json_obj);
     let nested_str = serde_json::to_string(&nested_obj).unwrap();
-    context_obj.push_str(&format!(r#"{},"#, nested_str));
+    context_obj.push_str(&format!(r#"{}"#, nested_str));
 }
 
 fn build_nested_object(json: &serde_json::Map<String, Value>) -> serde_json::Map<String, Value> {

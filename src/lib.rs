@@ -217,7 +217,10 @@ impl Evaluator {
             Some(serde_json::Value::String(s)) => {
                 if s.contains('{') && s.contains('}') {
                     match serde_json::from_str::<Value>(s) {
-                        Ok(v) => Ok(v.to_string() == "true"),
+                        Ok(v) => match v {
+                            Value::Object(_) => Ok(true),
+                            _ => Ok(false),
+                        }
                         Err(_) => Ok(false),
                     }
                 } else if s != ""
