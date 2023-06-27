@@ -101,7 +101,7 @@ fn test_json_payload_eval() {
         logger,
     );
 
-    let expr1 = "event.payload === \"\"";
+    let expr1 = "event.payload === null";
 
     let res1 = evaluator.evaluate(expr1).unwrap();
 
