@@ -1,5 +1,7 @@
 # Exprimo
 
+<img src="assets/logo.png" width="250" title="rusty">
+
 **CAUTION:** Beware of Sneaky Bugs in the Early Project Stages!
 There will be bug, probably alot at first :D
 
