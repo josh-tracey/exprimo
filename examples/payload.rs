@@ -1,9 +1,9 @@
-use exprimo::Evaluator;
 use serde_json::Value;
 use std::collections::HashMap;
+use std::error::Error;
 
 #[cfg(feature = "logging")]
-use scribe_rust::Logger;
+use scribe_rust;
 
 pub fn add_context(key: &str, json_str: &str, context: &mut HashMap<String, String>) {
     let json: Value = match serde_json::from_str(json_str) {
@@ -85,54 +85,24 @@ pub fn to_json(context: &HashMap<String, String>) -> HashMap<String, serde_json:
     json
 }
 
-#[cfg(test)]
-#[test]
-fn test_json_payload_eval() {
-    let mut context: HashMap<String, String> = HashMap::new();
 
-    add_context("event", r#"{}"#, &mut context);
 
+fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(feature = "logging")]
-    let logger = Logger::default();
+    let logger = scribe_rust::Logger::default();
 
-    let evaluator = Evaluator::new(
-        to_json(&context),
+    let mut ctx = HashMap::new();
+
+    add_context("send_email", r#"{"status": "success"}"#, &mut ctx);
+    let engine = exprimo::Evaluator::new(
+        to_json(&ctx),
         #[cfg(feature = "logging")]
         logger,
     );
 
-    let expr1 = "event.payload === null";
+    let result = engine.evaluate("send_email.status === \"success\"")?;
 
-    let res1 = evaluator.evaluate(expr1).unwrap();
+    println!("send_email.status === 'success' => {}", result);
 
-    assert_eq!(res1, false);
+    Ok(())
 }
-
-#[cfg(test)]
-#[test]
-fn test_json_payload_eval2() {
-    use std::println;
-
-    let mut context: HashMap<String, String> = HashMap::new();
-
-    add_context("send_email", r#"{"status": "success"}"#, &mut context);
-
-
-    println!("context: {:?}", context);
-
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        to_json(&context),
-        #[cfg(feature = "logging")]
-        logger,
-    );
-
-    let expr1 = "send_email.status === \"success\"";
-
-    let res1 = evaluator.evaluate(expr1).unwrap();
-
-    assert_eq!(res1, true);
-}
-
