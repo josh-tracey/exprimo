@@ -69,7 +69,7 @@ dependencies = [
 
 [[package]]
 name = "exprimo"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "rslint_parser",
  "scribe-rust",
