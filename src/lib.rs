@@ -49,7 +49,16 @@ impl Evaluator {
 
     pub fn evaluate(&self, expression: &str) -> Result<bool> {
         let ast = parse_text(expression, 0).syntax();
-        let untyped_expr_node = ast.first_child().unwrap();
+        let untyped_expr_node = match ast.first_child() {
+            Some(node) => node,
+            None => {
+                return Err(NodeError {
+                    message: "Empty expression".to_string(),
+                    node: None,
+                }
+                .into())
+            }
+        };
 
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
@@ -75,7 +84,16 @@ impl Evaluator {
 
         let res = match node.kind() {
             SyntaxKind::EXPR_STMT => {
-                let expr = node.first_child().unwrap();
+                let expr = match node.first_child() {
+                    Some(node) => node,
+                    None => {
+                        return Err(NodeError {
+                            message: "Empty expression".to_string(),
+                            node: None,
+                        }
+                        .into())
+                    }
+                };
                 self.evaluate_node(&expr)
             }
             SyntaxKind::DOT_EXPR => self.evaluate_dot_expr(&node.try_to::<DotExpr>().unwrap()),
@@ -212,7 +230,15 @@ impl Evaluator {
             .trace(&format!("DotExpr left {}", left.to_string()));
 
         while let Some(child) = left.child_with_kind(SyntaxKind::DOT_EXPR) {
-            let dot_expr = child.try_to::<DotExpr>().unwrap();
+            let dot_expr = match child.try_to::<DotExpr>() {
+                Some(d) => d,
+                None => {
+                    return Err(NodeError {
+                        message: "DotExpr child is not a DotExpr".to_string(),
+                        node: Some(child),
+                    })
+                }
+            };
             #[cfg(feature = "logging")]
             self.logger
                 .trace(&format!("DotExpr child_expr {}", dot_expr.to_string()));
@@ -254,7 +280,7 @@ impl Evaluator {
                     Ok(true)
                 }
             }
-            Some(serde_json::Value::Number(n)) => Ok(n.as_i64().unwrap() != 0),
+            Some(serde_json::Value::Number(n)) => Ok(n.as_i64().unwrap_or(0) != 0),
             Some(serde_json::Value::Null) => Ok(false),
             Some(serde_json::Value::Array(a)) => Ok(!a.is_empty()),
             Some(serde_json::Value::Object(_)) => Ok(true),
@@ -349,7 +375,7 @@ impl Evaluator {
 
         match value {
             serde_json::Value::Bool(b) => Ok(b),
-            serde_json::Value::Number(n) => Ok(n.as_i64().unwrap() != 0),
+            serde_json::Value::Number(n) => Ok(n.as_i64().unwrap_or(0) != 0),
             serde_json::Value::String(s) => Ok(!s.is_empty()),
             serde_json::Value::Array(a) => Ok(!a.is_empty()),
             serde_json::Value::Object(o) => Ok(!o.is_empty()),
