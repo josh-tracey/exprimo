@@ -100,9 +100,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         logger,
     );
 
-    let result = engine.evaluate("send_email.status === 'success'")?;
+    let expr = r#"send_email.status === 'success'"#;
 
-    println!("send_email.status === 'success' => {}", result);
+    let result = engine.evaluate(expr)?;
+
+    println!("send_email.status == 'success' => {}", result);
 
     Ok(())
 }

@@ -14,7 +14,7 @@ pub struct EvaluationError {
 }
 
 #[derive(Error, Debug)]
-#[error("Node error")]
+#[error("Node error {message}, node: {node:?}")]
 pub struct NodeError {
     message: String,
     node: Option<SyntaxNode>,
@@ -88,7 +88,7 @@ impl Evaluator {
                     Some(node) => node,
                     None => {
                         return Err(NodeError {
-                            message: "Empty expression".to_string(),
+                            message: "[Empty expression]".to_string(),
                             node: None,
                         }
                         .into())
@@ -113,7 +113,7 @@ impl Evaluator {
         self.logger.trace(&format!(
             "NodeKind: {:?} => {:#?}",
             node.kind(),
-            res.as_ref().unwrap()
+            res.as_ref()
         ));
 
         res
@@ -234,7 +234,7 @@ impl Evaluator {
                 Some(d) => d,
                 None => {
                     return Err(NodeError {
-                        message: "DotExpr child is not a DotExpr".to_string(),
+                        message: "[DotExpr child is not a DotExpr]".to_string(),
                         node: Some(child),
                     })
                 }
@@ -285,7 +285,7 @@ impl Evaluator {
             Some(serde_json::Value::Array(a)) => Ok(!a.is_empty()),
             Some(serde_json::Value::Object(_)) => Ok(true),
             None => Err(NodeError {
-                message: "Identifier Not Found In Context.".to_string(),
+                message: "[Identifier Not Found In Context].".to_string(),
                 node: None,
             }),
         };
@@ -293,7 +293,7 @@ impl Evaluator {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!("Identifier Result: {:?}", res));
         res.map_err(|e| NodeError {
-            message: format!("Identifier Evaluation Error => {}", e).to_string(),
+            message: format!("[Identifier Evaluation Error] => {}", e).to_string(),
             node: None,
         })
     }
@@ -369,7 +369,7 @@ impl Evaluator {
 
         let value: serde_json::Value =
             serde_json::from_str(&literal_value).map_err(|e| NodeError {
-                message: format!("Literal Evaluation Error => {}", e).to_string(),
+                message: format!("[Literal Evaluation Error] => {}", e).to_string(),
                 node: Some(literal.syntax().clone()),
             })?;
 
