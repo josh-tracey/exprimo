@@ -3,6 +3,23 @@ use rslint_parser::{
     parse_text, AstNode, SyntaxKind, SyntaxNode, SyntaxNodeExt,
 };
 
+use anyhow::Result;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+#[error("Evaluation error")]
+pub struct EvaluationError {
+    #[from]
+    source: NodeError,
+}
+
+#[derive(Error, Debug)]
+#[error("Node error")]
+pub struct NodeError {
+    message: String,
+    node: Option<SyntaxNode>,
+}
+
 #[cfg(feature = "logging")]
 use scribe_rust::Logger;
 use serde_json::Value;
@@ -10,7 +27,7 @@ use serde_json::Value;
 #[cfg(feature = "logging")]
 use std::sync::Arc;
 
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 pub struct Evaluator {
     context: HashMap<String, serde_json::Value>,
@@ -30,7 +47,7 @@ impl Evaluator {
         }
     }
 
-    pub fn evaluate(&self, expression: &str) -> Result<bool, Box<dyn Error>> {
+    pub fn evaluate(&self, expression: &str) -> Result<bool> {
         let ast = parse_text(expression, 0).syntax();
         let untyped_expr_node = ast.first_child().unwrap();
 
@@ -48,7 +65,7 @@ impl Evaluator {
         Ok(result)
     }
 
-    fn evaluate_node(&self, node: &SyntaxNode) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_node(&self, node: &SyntaxNode) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluting NodeKind: {:#?}, {:?}",
@@ -84,7 +101,7 @@ impl Evaluator {
         res
     }
 
-    fn evaluate_bin_expr(&self, bin_expr: &BinExpr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_bin_expr(&self, bin_expr: &BinExpr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Binary Expression: {:#?}",
@@ -130,7 +147,7 @@ impl Evaluator {
         Ok(result)
     }
 
-    fn evaluate_prefix_expr(&self, prefix_expr: &UnaryExpr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_prefix_expr(&self, prefix_expr: &UnaryExpr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Prefix Expression: {:#?}",
@@ -158,7 +175,7 @@ impl Evaluator {
         Ok(result)
     }
 
-    fn evaluate_cond_expr(&self, cond_expr: &CondExpr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_cond_expr(&self, cond_expr: &CondExpr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Conditional Expression: {:#?}",
@@ -182,7 +199,7 @@ impl Evaluator {
         Ok(result)
     }
 
-    fn evaluate_dot_expr(&self, dot_expr: &DotExpr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_dot_expr(&self, dot_expr: &DotExpr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Dot Expression: {:#?}",
@@ -205,7 +222,7 @@ impl Evaluator {
         self.evaluate_by_name(left.first_token().unwrap().to_string())
     }
 
-    fn evaluate_by_name(&self, identifier_name: String) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_by_name(&self, identifier_name: String) -> Result<bool, NodeError> {
         let identifier_value = self.context.get(&identifier_name);
 
         #[cfg(feature = "logging")]
@@ -220,7 +237,7 @@ impl Evaluator {
                         Ok(v) => match v {
                             Value::Object(_) => Ok(true),
                             _ => Ok(false),
-                        }
+                        },
                         Err(_) => Ok(false),
                     }
                 } else if s != ""
@@ -241,15 +258,21 @@ impl Evaluator {
             Some(serde_json::Value::Null) => Ok(false),
             Some(serde_json::Value::Array(a)) => Ok(!a.is_empty()),
             Some(serde_json::Value::Object(_)) => Ok(true),
-            None => Err(Box::from("Identifier not found in context.")),
+            None => Err(NodeError {
+                message: "Identifier Not Found In Context.".to_string(),
+                node: None,
+            }),
         };
 
         #[cfg(feature = "logging")]
         self.logger.trace(&format!("Identifier Result: {:?}", res));
-        res
+        res.map_err(|e| NodeError {
+            message: format!("Identifier Evaluation Error => {}", e).to_string(),
+            node: None,
+        })
     }
 
-    fn evaluate_name(&self, name: &Name) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_name(&self, name: &Name) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger
             .trace(&format!("Evaluating Name: {:#?}", name.to_string()));
@@ -267,7 +290,7 @@ impl Evaluator {
         self.evaluate_by_name(identifier_name)
     }
 
-    fn evaluate_name_ref(&self, name_ref: &NameRef) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_name_ref(&self, name_ref: &NameRef) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Name Reference: {:#?}",
@@ -287,7 +310,7 @@ impl Evaluator {
         self.evaluate_by_name(identifier_name)
     }
 
-    fn evaluate_identifier(&self, identifier: &Expr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_identifier(&self, identifier: &Expr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger.trace(&format!(
             "Evaluating Identifier: {:#?}",
@@ -307,7 +330,7 @@ impl Evaluator {
         self.evaluate_by_name(identifier_name)
     }
 
-    fn evaluate_literal(&self, literal: &Expr) -> Result<bool, Box<dyn Error>> {
+    fn evaluate_literal(&self, literal: &Expr) -> Result<bool, NodeError> {
         #[cfg(feature = "logging")]
         self.logger
             .trace(&format!("Evaluating Literal: {:#?}", literal.to_string()));
@@ -319,7 +342,10 @@ impl Evaluator {
             .trace(&format!("Literal value: {:#?}", literal_value));
 
         let value: serde_json::Value =
-            serde_json::from_str(&literal_value).map_err(|e| Box::new(e) as Box<dyn Error>)?;
+            serde_json::from_str(&literal_value).map_err(|e| NodeError {
+                message: format!("Literal Evaluation Error => {}", e).to_string(),
+                node: Some(literal.syntax().clone()),
+            })?;
 
         match value {
             serde_json::Value::Bool(b) => Ok(b),
