@@ -129,8 +129,27 @@ impl Evaluator {
         let left = bin_expr.lhs();
         let right = bin_expr.rhs();
 
-        let left_value = self.evaluate_node(left.unwrap().syntax())?;
-        let right_value = self.evaluate_node(right.unwrap().syntax())?;
+        let left_value = self.evaluate_node(&match left {
+            Some(node) => node.syntax().clone(),
+            None => {
+                return Err(NodeError {
+                    message: "[Empty BinExpr Left Expression]".to_string(),
+                    node: Some(bin_expr.syntax().clone()),
+                }
+                .into())
+            }
+        })?;
+
+        let right_value = self.evaluate_node(&match right {
+            Some(node) => node.syntax().clone(),
+            None => {
+                return Err(NodeError {
+                    message: "[Empty BinExpr Right Expression]".to_string(),
+                    node: Some(bin_expr.syntax().clone()),
+                }
+                .into())
+            }
+        })?;
 
         let op = bin_expr.op_details();
 
@@ -171,7 +190,16 @@ impl Evaluator {
             "Evaluating Prefix Expression: {:#?}",
             prefix_expr.to_string()
         ));
-        let expr = prefix_expr.expr().unwrap();
+        let expr = match prefix_expr.expr() {
+            Some(node) => node,
+            None => {
+                return Err(NodeError {
+                    message: "[Empty PrefixExpr Expression]".to_string(),
+                    node: Some(prefix_expr.syntax().clone()),
+                }
+                .into())
+            }
+        };
         let expr_value = self.evaluate_node(expr.syntax())?;
 
         let op = prefix_expr.op_details();
@@ -199,9 +227,36 @@ impl Evaluator {
             "Evaluating Conditional Expression: {:#?}",
             cond_expr.to_string()
         ));
-        let cond = cond_expr.test().unwrap();
-        let true_expr = cond_expr.cons().unwrap();
-        let false_expr = cond_expr.alt().unwrap();
+        let cond = match cond_expr.test() {
+            Some(node) => node,
+            None => {
+                return Err(NodeError {
+                    message: "[Empty CondExpr Test Expression]".to_string(),
+                    node: Some(cond_expr.syntax().clone()),
+                }
+                .into())
+            }
+        };
+        let true_expr = match cond_expr.cons() {
+            Some(node) => node,
+            None => {
+                return Err(NodeError {
+                    message: "[Empty CondExpr Consequent Expression]".to_string(),
+                    node: Some(cond_expr.syntax().clone()),
+                }
+                .into())
+            }
+        };
+        let false_expr = match cond_expr.alt() {
+            Some(node) => node,
+            None => {
+                return Err(NodeError {
+                    message: "[Empty CondExpr Alternate Expression]".to_string(),
+                    node: Some(cond_expr.syntax().clone()),
+                }
+                .into())
+            }
+        };
 
         let cond_value = self.evaluate_node(cond.syntax())?;
 
@@ -245,7 +300,19 @@ impl Evaluator {
             left = dot_expr.clone().syntax().clone();
         }
 
-        self.evaluate_by_name(left.first_token().unwrap().to_string())
+        self.evaluate_by_name(
+            match left.first_token() {
+                Some(token) => token.text().to_string(),
+                None => {
+                    return Err(NodeError {
+                        message: "[Empty DotExpr]".to_string(),
+                        node: Some(left),
+                    }
+                    .into())
+                }
+            }
+            .to_string(),
+        )
     }
 
     fn evaluate_by_name(&self, identifier_name: String) -> Result<bool, NodeError> {
@@ -302,7 +369,16 @@ impl Evaluator {
         #[cfg(feature = "logging")]
         self.logger
             .trace(&format!("Evaluating Name: {:#?}", name.to_string()));
-        let identifier_name = name.ident_token().unwrap().to_string();
+        let identifier_name = match name.ident_token() {
+            Some(token) => token.to_string(),
+            None => {
+                return Err(NodeError {
+                    message: "[Empty Name]".to_string(),
+                    node: Some(name.syntax().clone()),
+                }
+                .into())
+            }
+        };
 
         if identifier_name == "undefined"
             || identifier_name == "NaN"
@@ -322,7 +398,16 @@ impl Evaluator {
             "Evaluating Name Reference: {:#?}",
             name_ref.to_string()
         ));
-        let identifier_name = name_ref.ident_token().unwrap().to_string();
+        let identifier_name = match name_ref.ident_token() {
+            Some(token) => token.to_string(),
+            None => {
+                return Err(NodeError {
+                    message: "[Empty NameRef]".to_string(),
+                    node: Some(name_ref.syntax().clone()),
+                }
+                .into())
+            }
+        };
 
         if identifier_name == "undefined"
             || identifier_name == "NaN"
