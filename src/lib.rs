@@ -342,9 +342,9 @@ impl Evaluator {
                     || s != "Infinity"
                     || !s.is_empty()
                 {
-                    Ok(false)
-                } else {
                     Ok(true)
+                } else {
+                    Ok(false)
                 }
             }
             Some(serde_json::Value::Number(n)) => Ok(n.as_i64().unwrap_or(0) != 0),
