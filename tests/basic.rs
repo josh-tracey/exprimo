@@ -80,7 +80,7 @@ use scribe_rust::Logger;
 
         context.insert(
             "a".to_string(),
-            serde_json::Value::String("undefined".to_string()),
+            serde_json::Value::String("".to_string()),
         );
         context.insert("b".to_string(), serde_json::Value::Bool(true));
 

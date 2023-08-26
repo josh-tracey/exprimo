@@ -461,7 +461,20 @@ impl Evaluator {
         match value {
             serde_json::Value::Bool(b) => Ok(b),
             serde_json::Value::Number(n) => Ok(n.as_i64().unwrap_or(0) != 0),
-            serde_json::Value::String(s) => Ok(!s.is_empty()),
+            serde_json::Value::String(s) => {
+                if !s.is_empty()
+                    || s != "false"
+                    || s != "0"
+                    || s != "null"
+                    || s != "undefined"
+                    || s != "NaN"
+                    || s != "Infinity"
+                {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
             serde_json::Value::Array(a) => Ok(!a.is_empty()),
             serde_json::Value::Object(o) => Ok(!o.is_empty()),
             serde_json::Value::Null => Ok(false),
