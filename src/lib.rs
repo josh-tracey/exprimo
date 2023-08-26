@@ -446,7 +446,7 @@ impl Evaluator {
         self.logger
             .trace(&format!("Evaluating Literal: {:#?}", literal.to_string()));
 
-        let literal_value = literal.to_string();
+        let literal_value = literal.to_string().replace('\'', "\"");
 
         #[cfg(feature = "logging")]
         self.logger
