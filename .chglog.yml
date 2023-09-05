@@ -1,0 +1,4 @@
+debug: false
+package-name: "exprimo"
+owner: "Joshua Tracey <joshua.tracey08@gmail.com>"
+conventional-commits: true

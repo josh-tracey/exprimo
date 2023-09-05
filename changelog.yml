@@ -1,0 +1,509 @@
+- semver: 0.1.10
+  date: 2023-07-02T22:44:02+10:00
+  packager: Joshua Tracey <joshua.tracey08@gmail.com>
+  changes:
+    - commit: 3bfaa7a3dc3955f0b754261a39fe54d52ece162e
+      note: version bump
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: version bump
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 5cbb7300db53ca3a36e7da9dd7c67b4bf5efd4bc
+      note: 0.1.10
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.10
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 0105f90afe3c96b38c2f63447569de0149666032
+      note: Add better error handling
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Add better error handling
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: f00d40346634bc1a9f64dcac9e5bd1abffae7653
+      note: Add better error handling
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Add better error handling
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 8d3ba690fa4e7453c8f530a8bf12efe6d4d08898
+      note: 0.1.9
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.9
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 05021dc4f7da25e3dcc230e4dce455a0b54acf52
+      note: 0.1.8
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.8
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+- semver: 0.1.8
+  date: 2023-07-02T21:06:51+10:00
+  packager: Joshua Tracey <joshua.tracey08@gmail.com>
+  changes:
+    - commit: 13e3c40abe498d5c50b6d72d6f0eec2200076be6
+      note: Add another test and example
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Add another test and example
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 992fd6bb9dba17347cb07258ad3465e2ef54ed1f
+      note: Add assets
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Add assets
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+- semver: 0.1.7
+  date: 2023-06-27T10:04:22+10:00
+  packager: Joshua Tracey <joshua.tracey08@gmail.com>
+  changes:
+    - commit: 80dd1f4e1545d77c2ee0af34cbe3233ada9522d8
+      note: 0.1.7
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.7
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 338cc44ce59fa9334f6b46adc6088b80d8c62e7e
+      note: fix typo
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: fix typo
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 28a91a6a1a531b3e370b4f1756b658ff37fe4cbc
+      note: wip handle nested json payloads
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: wip handle nested json payloads
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+- semver: 0.1.6
+  date: 2023-06-26T19:59:30+10:00
+  packager: Joshua Tracey <joshua.tracey08@gmail.com>
+  changes:
+    - commit: 9c38b31277edd2ca0b78bf1a74aa797773a1533f
+      note: 0.1.6
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.6
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: b4f8b49fee51e645ce932fc4ed5c32f62ed5d9c6
+      note: Updates to evaluate_by_name string eval, plus move tests to tests/basic.rs
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Updates to evaluate_by_name string eval, plus move tests to tests/basic.rs
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 27fd9c6ebf493f8f6105236939d5a1c5dd86a647
+      note: 0.1.5
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.5
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 4e21f8a4c138d32a4e6a12fa5016c5376f12bd97
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: e0b3224ac97f645116befa6100f53704ebd86830
+      note: add fix for silly goof :P
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: add fix for silly goof :P
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 842b736ca84d21b5b32bc346d064f5d0a53e61de
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 335bf38f2c4e110582121a32ab828bab6d5e40d7
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 9032ce11a52f72234619e5f363cdb5e026dec52b
+      note: Bug warning :P
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Bug warning :P
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: a25f4aed45f29af098f23cf1ce8bc594fcc97ffc
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 060f52819c214f3c4b5ec0e636e7faa96521f81a
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 0ebef333f36084db41bf4cd852ab5e4bc0e7b4b4
+      note: Update README.md
+      author:
+        name: Joshua Tracey
+        email: 11015195+josh-tracey@users.noreply.github.com
+      committer:
+        name: GitHub
+        email: noreply@github.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update README.md
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: e730e64fdbfb122633a7ddf7435b70aeb0368493
+      note: .
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: .
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 3838adbea9c64508b1a6f6487756430999beb8c0
+      note: .
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: .
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: c99600d3ffd6da43155f8c87c7db599c746a39c4
+      note: 0.1.2
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.2
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 876ddbb721215c29d7e5d5b6b035a2b63bde44fb
+      note: 0.1.1
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.1
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: b598ef42be8daa5cf23a1fc501bbc4171dd03cd8
+      note: Update readme
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update readme
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 955257296339a7c4a2caa985272dcd315c51c41c
+      note: Update readme
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Update readme
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 01520b06bd5a45baf4e7f11b52ca0a69088c06ab
+      note: init
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: init
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
