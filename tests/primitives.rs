@@ -21,5 +21,5 @@ fn test_primitives() {
     let expr1 = "null == undefined";
     let res1 = evaluator.evaluate(&expr1).unwrap();
 
-    assert_eq!(res1, false);
+    assert_eq!(res1, true);
 }
