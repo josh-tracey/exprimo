@@ -1,3 +1,245 @@
+- semver: 0.1.15
+  date: 2023-09-05T14:50:49.206792+10:00
+  packager: Joshua Tracey <joshua.tracey08@gmail.com>
+  changes:
+    - commit: f31f01cf61c39423a67da0ea9a453241ccaedecb
+      note: 'fix: address failing primitive test that is technically correct, even though js is dumb'
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: fix
+        scope: ""
+        description: address failing primitive test that is technically correct, even though js is dumb
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: true
+    - commit: 26f00c1d626774322a3223ffda4d0cab619b1507
+      note: 'chore: generate initial changelog'
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: generate initial changelog
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 27256649f3541cf0710ae8378c0cbf86302bed7f
+      note: 'chore: remove node orb'
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: remove node orb
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 4435ffacf8397048545c4ffcf4847f34fc121090
+      note: 'chore: add commit-msg hook and circleci config'
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: add commit-msg hook and circleci config
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 399a47ec9ece262c9d5c784162ec733761930dbd
+      note: v0.1.14
+      author:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      committer:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: v0.1.14
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 2b645f889f7e62fafa151698267bf3b25c4d63b5
+      note: fix single quote issue
+      author:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      committer:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: fix single quote issue
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: dfbbc0d2f52d5e97153f48fb734aa744c5ff3729
+      note: .
+      author:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      committer:
+        name: joshu
+        email: joshua.tracey08@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: .
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 3d068f210cc4d8a85892fb7969daff34dbc669d7
+      note: 0.1.13
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.13
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 4b995eb469bf9c3a2dd02c2fa84b433699207580
+      note: update packages
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: update packages
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: ad77181b50134b20fb8a76d2af0b636e621c2e33
+      note: 0.1.12
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: 0.1.12
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 0df92b1de509c5602b5edc97de2fd1d0146cf652
+      note: fix reference lookup bug
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@gmail.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: fix reference lookup bug
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: fbe141cb1a5a4f3e52c77b6263ef60b0e86c7e9a
+      note: ..
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: ..
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 1ce3b2bcc5b9a3e0f4f254caa57ac1d5e8f80be6
+      note: v0.1.11
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: v0.1.11
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
+    - commit: 7b6b4c03ba85e95ff637cc97759cfad50cb3b8cc
+      note: Handle None values with proper errors
+      author:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      committer:
+        name: Joshua Tracey
+        email: joshua.tracey@certcrowd.com
+      conventional_commit:
+        category: chore
+        scope: ""
+        description: Handle None values with proper errors
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: false
 - semver: 0.1.10
   date: 2023-07-02T22:44:02+10:00
   packager: Joshua Tracey <joshua.tracey08@gmail.com>

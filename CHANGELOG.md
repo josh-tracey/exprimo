@@ -1,4 +1,23 @@
 
+0.1.15
+=============
+2023-09-05
+
+* fix: address failing primitive test that is technically correct, even though js is dumb (f31f01cf)
+* chore: generate initial changelog (26f00c1d)
+* chore: remove node orb (27256649)
+* chore: add commit-msg hook and circleci config (4435ffac)
+* v0.1.14 (399a47ec)
+* fix single quote issue (2b645f88)
+* . (dfbbc0d2)
+* 0.1.13 (3d068f21)
+* update packages (4b995eb4)
+* 0.1.12 (ad77181b)
+* fix reference lookup bug (0df92b1d)
+* .. (fbe141cb)
+* v0.1.11 (1ce3b2bc)
+* Handle None values with proper errors (7b6b4c03)
+
 0.1.10
 =============
 2023-07-02
