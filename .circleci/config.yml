@@ -50,7 +50,6 @@ jobs:
 
 orbs:
   rust: circleci/rust@1.6.0
-  node: circleci/node@5.0.0
 
 version: 2.1
 
