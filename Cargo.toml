@@ -1,6 +1,6 @@
 [package]
 name = "exprimo"
-version = "0.1.15"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 authors = ["joshua.tracey08@gmail.com"]
@@ -14,7 +14,7 @@ keywords = ["expression", "eval", "js-expression", "js-eval", "javascript"]
 [dependencies]
 anyhow = "~1"
 rslint_parser = "~0.3"
-scribe-rust = { version ="~0.1", optional = true }
+scribe-rust = { version = "~0.2", optional = true }
 serde = "~1"
 serde_json = "~1"
 thiserror = "~1"
