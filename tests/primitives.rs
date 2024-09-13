@@ -18,8 +18,8 @@ fn test_primitives() {
         logger,
     );
 
-    let expr1 = "null == undefined";
+    let expr1 = "1/2";
     let res1 = evaluator.evaluate(&expr1).unwrap();
 
-    assert_eq!(res1, true);
+    assert_eq!(res1, 0.5);
 }

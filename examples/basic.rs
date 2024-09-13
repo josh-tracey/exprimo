@@ -6,19 +6,21 @@ use scribe_rust;
 
 use exprimo;
 
-fn main() -> Result<(), Box<dyn Error>>{
+fn main() -> Result<(), Box<dyn Error>> {
+    #[cfg(feature = "logging")]
+    let logger = scribe_rust::Logger::default();
 
-  #[cfg(feature = "logging")]
-  let logger = scribe_rust::Logger::default();
+    let mut ctx = HashMap::new();
+    ctx.insert("x".to_string(), serde_json::Value::Number(5.into()));
+    let engine = exprimo::Evaluator::new(
+        ctx,
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-  let mut ctx = HashMap::new();
-  ctx.insert("x".to_string(), serde_json::Value::Number(5.into()));
-  let engine = exprimo::Evaluator::new(ctx, #[cfg(feature = "logging")] logger);
+    let result = engine.evaluate("x == 5")?;
 
-  let result = engine.evaluate("x == 0")?;
+    println!("x = {}", result);
 
-  println!("x = {}", result);
-
-  Ok(())
-
+    Ok(())
 }

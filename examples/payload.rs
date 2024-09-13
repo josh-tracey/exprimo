@@ -77,15 +77,12 @@ fn build_nested_array(json: &[Value]) -> Vec<Value> {
 pub fn to_json(context: &HashMap<String, String>) -> HashMap<String, serde_json::Value> {
     let mut json = HashMap::new();
     for (key, value) in context.iter() {
-        json.insert(
-            key.to_string(),
-            serde_json::Value::String(value.to_string()),
-        );
+        let parsed_value =
+            serde_json::from_str(value).unwrap_or_else(|_| Value::String(value.clone()));
+        json.insert(key.to_string(), parsed_value);
     }
     json
 }
-
-
 
 fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(feature = "logging")]
@@ -100,11 +97,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         logger,
     );
 
-    let expr = r#"send_email.status === "#;
+    let expr = r#"send_email.status === 'success' "#;
 
     let result = engine.evaluate(expr)?;
 
-    println!("send_email.status == 'success' => {}", result);
+    println!("send_email.status === 'success' => {}", result);
 
     Ok(())
 }
