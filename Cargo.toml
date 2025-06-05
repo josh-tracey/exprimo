@@ -17,8 +17,10 @@ rslint_parser = "~0.3"
 scribe-rust = { version = "~0.2", optional = true }
 serde = "~1"
 serde_json = "~1"
+serde_json_ctx = { version = "0.1.0", optional = true }
 thiserror = "~1"
 
 [features]
-default = []
+default = ["serde_json_ctx"]
+serde_json_ctx = ["dep:serde_json_ctx"]
 logging = ["scribe-rust"]
