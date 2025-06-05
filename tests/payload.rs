@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use exprimo::Evaluator;
     use exprimo::EvaluationError; // Added import
+    use exprimo::Evaluator;
     use serde_json::Value;
     use std::collections::HashMap;
 
@@ -34,7 +34,7 @@ mod tests {
         add_context("event", r#"{}"#, &mut context);
 
         #[cfg(feature = "logging")]
-        let logger = Arc::new(Logger::default());
+        let logger = Logger::default();
 
         let evaluator = Evaluator::new(
             to_json(&context),
@@ -57,7 +57,7 @@ mod tests {
         add_context("send_email", r#"{"status": "success"}"#, &mut context);
 
         #[cfg(feature = "logging")]
-        let logger = Arc::new(Logger::default());
+        let logger = Logger::default();
 
         let evaluator = Evaluator::new(
             to_json(&context),
@@ -92,7 +92,7 @@ mod tests {
         );
 
         #[cfg(feature = "logging")]
-        let logger = Arc::new(Logger::default());
+        let logger = Logger::default();
         let evaluator = Evaluator::new(
             context.clone().into_iter().collect(),
             HashMap::new(), // custom_functions
@@ -107,7 +107,10 @@ mod tests {
             Err(EvaluationError::TypeError(msg)) => {
                 assert!(msg.contains("Cannot read properties of null or primitive value: null (trying to access property: payload)"));
             }
-            _ => panic!("Expected TypeError for event.payload when event is null, got {:?}", expr1_eval),
+            _ => panic!(
+                "Expected TypeError for event.payload when event is null, got {:?}",
+                expr1_eval
+            ),
         }
 
         // To test 'something === null' where something might be null due to object structure:

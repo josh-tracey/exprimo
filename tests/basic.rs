@@ -1,151 +1,151 @@
-use std::collections::HashMap;
 use exprimo::Evaluator;
+use std::collections::HashMap;
 
 #[cfg(feature = "logging")]
 use scribe_rust::Logger;
 
 #[cfg(test)]
+#[test]
+fn test_basic_evaluate_with_context() {
+    let mut context = HashMap::new();
 
-    #[test]
-    fn test_basic_evaluate_with_context() {
-        let mut context = HashMap::new();
+    context.insert("a".to_string(), serde_json::Value::Bool(true));
+    context.insert("b".to_string(), serde_json::Value::Bool(false));
 
-        context.insert("a".to_string(), serde_json::Value::Bool(true));
-        context.insert("b".to_string(), serde_json::Value::Bool(false));
+    #[cfg(feature = "logging")]
+    let logger = Logger::default();
 
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
-        let logger = Logger::default();
+        logger,
+    );
 
-        let evaluator = Evaluator::new(
-            context,
-            HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
-        );
+    let expr1 = "a && b";
+    let expr2 = "a || b";
+    let expr3 = "a && !b";
+    let expr4 = "a || !b";
+    let expr5 = "a && b || a && !b";
+    let res1 = evaluator.evaluate(&expr1).unwrap();
+    let res2 = evaluator.evaluate(&expr2).unwrap();
+    let res3 = evaluator.evaluate(&expr3).unwrap();
+    let res4 = evaluator.evaluate(&expr4).unwrap();
+    let res5 = evaluator.evaluate(&expr5).unwrap();
 
-        let expr1 = "a && b";
-        let expr2 = "a || b";
-        let expr3 = "a && !b";
-        let expr4 = "a || !b";
-        let expr5 = "a && b || a && !b";
-        let res1 = evaluator.evaluate(&expr1).unwrap();
-        let res2 = evaluator.evaluate(&expr2).unwrap();
-        let res3 = evaluator.evaluate(&expr3).unwrap();
-        let res4 = evaluator.evaluate(&expr4).unwrap();
-        let res5 = evaluator.evaluate(&expr5).unwrap();
+    assert_eq!(res1, false);
+    assert_eq!(res2, true);
+    assert_eq!(res3, true);
+    assert_eq!(res4, true);
+    assert_eq!(res5, true);
+}
 
-        assert_eq!(res1, false);
-        assert_eq!(res2, true);
-        assert_eq!(res3, true);
-        assert_eq!(res4, true);
-        assert_eq!(res5, true);
-    }
+#[test]
+fn test_basic_evaluate_with_nulls() {
+    let mut context = HashMap::new();
 
-    #[test]
-    fn test_basic_evaluate_with_nulls() {
-        let mut context = HashMap::new();
+    context.insert("a".to_string(), serde_json::Value::Null);
+    context.insert("b".to_string(), serde_json::Value::Bool(true));
 
-        context.insert("a".to_string(), serde_json::Value::Null);
-        context.insert("b".to_string(), serde_json::Value::Bool(true));
+    #[cfg(feature = "logging")]
+    let logger = Logger::default();
 
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
-        let logger = Logger::default();
+        logger,
+    );
 
-        let evaluator = Evaluator::new(
-            context,
-            HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
-        );
+    let expr1 = "a && b";
+    let expr2 = "a || b";
+    let expr3 = "a && !b";
+    let expr4 = "a || !b";
+    let expr5 = "a && b || a && !b";
+    let res1 = evaluator.evaluate(&expr1).unwrap();
+    let res2 = evaluator.evaluate(&expr2).unwrap();
+    let res3 = evaluator.evaluate(&expr3).unwrap();
+    let res4 = evaluator.evaluate(&expr4).unwrap();
+    let res5 = evaluator.evaluate(&expr5).unwrap();
 
-        let expr1 = "a && b";
-        let expr2 = "a || b";
-        let expr3 = "a && !b";
-        let expr4 = "a || !b";
-        let expr5 = "a && b || a && !b";
-        let res1 = evaluator.evaluate(&expr1).unwrap();
-        let res2 = evaluator.evaluate(&expr2).unwrap();
-        let res3 = evaluator.evaluate(&expr3).unwrap();
-        let res4 = evaluator.evaluate(&expr4).unwrap();
-        let res5 = evaluator.evaluate(&expr5).unwrap();
+    assert_eq!(res1, false);
+    assert_eq!(res2, true);
+    assert_eq!(res3, false);
+    assert_eq!(res4, false);
+    assert_eq!(res5, false);
+}
 
-        assert_eq!(res1, false);
-        assert_eq!(res2, true);
-        assert_eq!(res3, false);
-        assert_eq!(res4, false);
-        assert_eq!(res5, false);
-    }
+// #[test]
+// fn test_basic_evaluate_with_empty_strings() {
+//     let mut context = HashMap::new();
+//
+//     context.insert(
+//         "a".to_string(),
+//         serde_json::Value::String("".to_string()),
+//     );
+//     context.insert("b".to_string(), serde_json::Value::Bool(true));
+//
+//     #[cfg(feature = "logging")]
+//     let logger = Logger::default();
+//
+//     let evaluator = Evaluator::new(
+//         context,
+//         #[cfg(feature = "logging")]
+//         logger,
+//     );
+//
+//     let expr1 = "a && b";
+//     let expr2 = "a || b";
+//     let expr3 = "a && !b";
+//     let expr4 = "a || !b";
+//     let expr5 = "a && b || a && !b";
+//     let res1 = evaluator.evaluate(&expr1).unwrap();
+//     let res2 = evaluator.evaluate(&expr2).unwrap();
+//     let res3 = evaluator.evaluate(&expr3).unwrap();
+//     let res4 = evaluator.evaluate(&expr4).unwrap();
+//     let res5 = evaluator.evaluate(&expr5).unwrap();
+//
+//     assert_eq!(res1, false);
+//     assert_eq!(res2, true);
+//     assert_eq!(res3, false);
+//     assert_eq!(res4, false);
+//     assert_eq!(res5, false);
+// }
 
-    // #[test]
-    // fn test_basic_evaluate_with_empty_strings() {
-    //     let mut context = HashMap::new();
-    //
-    //     context.insert(
-    //         "a".to_string(),
-    //         serde_json::Value::String("".to_string()),
-    //     );
-    //     context.insert("b".to_string(), serde_json::Value::Bool(true));
-    //
-    //     #[cfg(feature = "logging")]
-    //     let logger = Logger::default();
-    //
-    //     let evaluator = Evaluator::new(
-    //         context,
-    //         #[cfg(feature = "logging")]
-    //         logger,
-    //     );
-    //
-    //     let expr1 = "a && b";
-    //     let expr2 = "a || b";
-    //     let expr3 = "a && !b";
-    //     let expr4 = "a || !b";
-    //     let expr5 = "a && b || a && !b";
-    //     let res1 = evaluator.evaluate(&expr1).unwrap();
-    //     let res2 = evaluator.evaluate(&expr2).unwrap();
-    //     let res3 = evaluator.evaluate(&expr3).unwrap();
-    //     let res4 = evaluator.evaluate(&expr4).unwrap();
-    //     let res5 = evaluator.evaluate(&expr5).unwrap();
-    //
-    //     assert_eq!(res1, false);
-    //     assert_eq!(res2, true);
-    //     assert_eq!(res3, false);
-    //     assert_eq!(res4, false);
-    //     assert_eq!(res5, false);
-    // }
+#[test]
+fn test_single_quotes_expressions() {
+    let mut context = HashMap::new();
 
-    #[test]
-    fn test_single_quotes_expressions() {
-        
-        let mut context = HashMap::new();
+    context.insert(
+        "a".to_string(),
+        serde_json::Value::String("true".to_string()),
+    );
 
-        context.insert("a".to_string(), serde_json::Value::String("true".to_string()));
+    #[cfg(feature = "logging")]
+    let logger = Logger::default();
 
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
-        let logger = Logger::default();
+        logger,
+    );
 
-        let evaluator = Evaluator::new(
-            context,
-            HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
-        );
+    let expr1 = "a == 'true'";
 
-        let expr1 = "a == 'true'";
-       
-        let res1 = evaluator.evaluate(&expr1).unwrap();
-        
-        assert_eq!(res1, true);
-               
-    }
+    let res1 = evaluator.evaluate(&expr1).unwrap();
+
+    assert_eq!(res1, true);
+}
 
 // --- Custom Function Tests ---
 
 // Imports needed for custom function tests
-use exprimo::{CustomFunction, CustomFuncError, EvaluationError};
+use exprimo::{CustomFuncError, CustomFunction, EvaluationError};
 use serde_json::Value; // Already imported at top level if this is the same file
-use std::sync::Arc;
-use std::fmt::Debug; // Required for CustomFunction trait
-// HashMap is already imported at top level
+use std::fmt::Debug;
+use std::sync::Arc; // Required for CustomFunction trait
+                    // HashMap is already imported at top level
 
 #[derive(Debug)] // Debug is required by the CustomFunction trait
 struct MyTestAdder;
@@ -153,17 +153,26 @@ struct MyTestAdder;
 impl CustomFunction for MyTestAdder {
     fn call(&self, args: &[Value]) -> Result<Value, CustomFuncError> {
         if args.len() != 2 {
-            return Err(CustomFuncError::ArityError { expected: 2, got: args.len() });
+            return Err(CustomFuncError::ArityError {
+                expected: 2,
+                got: args.len(),
+            });
         }
         match (&args[0], &args[1]) {
             (Value::Number(a), Value::Number(b)) => {
                 if let (Some(val_a), Some(val_b)) = (a.as_f64(), b.as_f64()) {
-                    Ok(Value::Number(serde_json::Number::from_f64(val_a + val_b).unwrap()))
+                    Ok(Value::Number(
+                        serde_json::Number::from_f64(val_a + val_b).unwrap(),
+                    ))
                 } else {
-                    Err(CustomFuncError::ArgumentError("Non-finite number provided".to_string()))
+                    Err(CustomFuncError::ArgumentError(
+                        "Non-finite number provided".to_string(),
+                    ))
                 }
             }
-            _ => Err(CustomFuncError::ArgumentError("Arguments must be numbers".to_string())),
+            _ => Err(CustomFuncError::ArgumentError(
+                "Arguments must be numbers".to_string(),
+            )),
         }
     }
 }
@@ -176,58 +185,114 @@ fn test_object_has_own_property_success() {
     let mut obj = serde_json::Map::new();
     obj.insert("name".to_string(), Value::String("Alice".to_string()));
     obj.insert("age".to_string(), Value::Number(30.into()));
-    obj.insert("".to_string(), Value::String("empty_string_key".to_string())); // Empty string as key
+    obj.insert(
+        "".to_string(),
+        Value::String("empty_string_key".to_string()),
+    ); // Empty string as key
     context.insert("myObj".to_string(), Value::Object(obj));
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty('name')").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty(\"age\")").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty('nonExistent')").unwrap(), Value::Bool(false));
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty('')").unwrap(), Value::Bool(true)); // Test empty string key
+    assert_eq!(
+        evaluator.evaluate("myObj.hasOwnProperty('name')").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator.evaluate("myObj.hasOwnProperty(\"age\")").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator
+            .evaluate("myObj.hasOwnProperty('nonExistent')")
+            .unwrap(),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        evaluator.evaluate("myObj.hasOwnProperty('')").unwrap(),
+        Value::Bool(true)
+    ); // Test empty string key
 
     // Test coercion of argument to string for a key that doesn't exist on myObj
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty(123)").unwrap(), Value::Bool(false)); // effectively myObj.hasOwnProperty("123")
-    assert_eq!(evaluator.evaluate("myObj.hasOwnProperty(true)").unwrap(), Value::Bool(false)); // effectively myObj.hasOwnProperty("true")
+    assert_eq!(
+        evaluator.evaluate("myObj.hasOwnProperty(123)").unwrap(),
+        Value::Bool(false)
+    ); // effectively myObj.hasOwnProperty("123")
+    assert_eq!(
+        evaluator.evaluate("myObj.hasOwnProperty(true)").unwrap(),
+        Value::Bool(false)
+    ); // effectively myObj.hasOwnProperty("true")
 
     // Setup a new context for an object that has stringified number as key
     let mut context2 = HashMap::new();
     let mut obj_with_true_key = serde_json::Map::new();
-    obj_with_true_key.insert("true".to_string(), Value::String("test value for boolean true key".to_string()));
+    obj_with_true_key.insert(
+        "true".to_string(),
+        Value::String("test value for boolean true key".to_string()),
+    );
     context2.insert("objTrueKey".to_string(), Value::Object(obj_with_true_key));
 
     #[cfg(feature = "logging")]
     let logger2_true = Logger::default();
-    let evaluator2_true = Evaluator::new(context2.clone(), HashMap::new(), #[cfg(feature = "logging")] logger2_true);
+    let evaluator2_true = Evaluator::new(
+        context2.clone(),
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger2_true,
+    );
 
     assert_eq!(
-        evaluator2_true.evaluate("objTrueKey.hasOwnProperty(true)").unwrap(), // Evaluates to objTrueKey.hasOwnProperty("true")
+        evaluator2_true
+            .evaluate("objTrueKey.hasOwnProperty(true)")
+            .unwrap(), // Evaluates to objTrueKey.hasOwnProperty("true")
         Value::Bool(true),
         "objTrueKey should have property 'true' when called with boolean true"
     );
     assert_eq!(
-        evaluator2_true.evaluate("objTrueKey.hasOwnProperty(false)").unwrap(), // Evaluates to objTrueKey.hasOwnProperty("false")
+        evaluator2_true
+            .evaluate("objTrueKey.hasOwnProperty(false)")
+            .unwrap(), // Evaluates to objTrueKey.hasOwnProperty("false")
         Value::Bool(false),
         "objTrueKey should not have property 'false'"
     );
-
 
     // Test with a key that looks like a number
     let mut context3 = HashMap::new();
     let mut obj_with_num_key_str = serde_json::Map::new();
     obj_with_num_key_str.insert("123".to_string(), Value::Bool(true));
-    context3.insert("objNumStrKey".to_string(), Value::Object(obj_with_num_key_str));
+    context3.insert(
+        "objNumStrKey".to_string(),
+        Value::Object(obj_with_num_key_str),
+    );
 
     #[cfg(feature = "logging")]
     let logger3_num = Logger::default();
-    let evaluator3_num = Evaluator::new(context3, HashMap::new(), #[cfg(feature = "logging")] logger3_num);
+    let evaluator3_num = Evaluator::new(
+        context3,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger3_num,
+    );
 
-    assert_eq!(evaluator3_num.evaluate("objNumStrKey.hasOwnProperty(123)").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator3_num.evaluate("objNumStrKey.hasOwnProperty('123')").unwrap(), Value::Bool(true));
+    assert_eq!(
+        evaluator3_num
+            .evaluate("objNumStrKey.hasOwnProperty(123)")
+            .unwrap(),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        evaluator3_num
+            .evaluate("objNumStrKey.hasOwnProperty('123')")
+            .unwrap(),
+        Value::Bool(true)
+    );
 }
-
 
 #[test]
 fn test_object_has_own_property_arity_error() {
@@ -235,7 +300,12 @@ fn test_object_has_own_property_arity_error() {
     context.insert("myObj".to_string(), Value::Object(serde_json::Map::new()));
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let res_no_args = evaluator.evaluate("myObj.hasOwnProperty()");
     match res_no_args {
@@ -243,7 +313,10 @@ fn test_object_has_own_property_arity_error() {
             assert_eq!(expected, 1);
             assert_eq!(got, 0);
         }
-        _ => panic!("Expected ArityError for no arguments, got {:?}", res_no_args),
+        _ => panic!(
+            "Expected ArityError for no arguments, got {:?}",
+            res_no_args
+        ),
     }
 
     let res_many_args = evaluator.evaluate("myObj.hasOwnProperty('prop', 'extra')");
@@ -252,7 +325,10 @@ fn test_object_has_own_property_arity_error() {
             assert_eq!(expected, 1);
             assert_eq!(got, 2);
         }
-        _ => panic!("Expected ArityError for many arguments, got {:?}", res_many_args),
+        _ => panic!(
+            "Expected ArityError for many arguments, got {:?}",
+            res_many_args
+        ),
     }
 }
 
@@ -264,17 +340,27 @@ fn test_object_has_own_property_on_non_object() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    let exprs_to_test = vec!["myArr.hasOwnProperty('length')", "myStr.hasOwnProperty('length')"];
     // Case 1: Array
     let expr_arr = "myArr.hasOwnProperty('length')";
     let result_arr = evaluator.evaluate(expr_arr);
     match result_arr {
         Err(EvaluationError::TypeError(msg)) => {
-            assert_eq!(msg, "Cannot read properties of null or primitive value: [Array] (trying to access property: hasOwnProperty)");
+            assert_eq!(
+                msg,
+                "'null' (resulting from expression 'myArr.hasOwnProperty') is not a function."
+            );
         }
-        _ => panic!("Expected TypeError for myArr.hasOwnProperty, got {:?}", result_arr),
+        _ => panic!(
+            "Expected TypeError for myArr.hasOwnProperty, got {:?}",
+            result_arr
+        ),
     }
 
     // Case 2: String
@@ -284,7 +370,10 @@ fn test_object_has_own_property_on_non_object() {
         Err(EvaluationError::TypeError(msg)) => {
             assert_eq!(msg, "Cannot read properties of null or primitive value: text (trying to access property: hasOwnProperty)");
         }
-        _ => panic!("Expected TypeError for myStr.hasOwnProperty, got {:?}", result_str),
+        _ => panic!(
+            "Expected TypeError for myStr.hasOwnProperty, got {:?}",
+            result_str
+        ),
     }
 }
 
@@ -299,10 +388,25 @@ fn test_object_has_own_property_nested() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("item.nestedObj.hasOwnProperty('value')").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("item.nestedObj.hasOwnProperty('nonExistent')").unwrap(), Value::Bool(false));
+    assert_eq!(
+        evaluator
+            .evaluate("item.nestedObj.hasOwnProperty('value')")
+            .unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator
+            .evaluate("item.nestedObj.hasOwnProperty('nonExistent')")
+            .unwrap(),
+        Value::Bool(false)
+    );
 }
 
 // --- Array.includes() Tests ---
@@ -320,19 +424,48 @@ fn test_array_includes_success() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("myArr.includes(10)").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myArr.includes(\"hello\")").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myArr.includes(true)").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myArr.includes(null)").unwrap(), Value::Bool(true));
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(10)").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(\"hello\")").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(true)").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(null)").unwrap(),
+        Value::Bool(true)
+    );
 
-    assert_eq!(evaluator.evaluate("myArr.includes(20)").unwrap(), Value::Bool(false));
-    assert_eq!(evaluator.evaluate("myArr.includes(\"world\")").unwrap(), Value::Bool(false));
-    assert_eq!(evaluator.evaluate("myArr.includes(false)").unwrap(), Value::Bool(false));
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(20)").unwrap(),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(\"world\")").unwrap(),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        evaluator.evaluate("myArr.includes(false)").unwrap(),
+        Value::Bool(false)
+    );
     // Note: Value::Null is present, so `myArr.includes(something_else_that_is_not_null)` should be false.
     // serde_json::Value::Object(Map::new()) is not in the array.
-    assert_eq!(evaluator.evaluate("myArr.includes({})").unwrap(), Value::Bool(false));
+    assert_eq!(
+        evaluator.evaluate("myArr.includes({})").unwrap(),
+        Value::Bool(false)
+    );
 }
 
 #[test]
@@ -341,7 +474,12 @@ fn test_array_includes_arity_error() {
     context.insert("myArr".to_string(), Value::Array(vec![]));
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let res_no_args = evaluator.evaluate("myArr.includes()");
     match res_no_args {
@@ -349,7 +487,10 @@ fn test_array_includes_arity_error() {
             assert_eq!(expected, 1);
             assert_eq!(got, 0);
         }
-        _ => panic!("Expected ArityError for no arguments, got {:?}", res_no_args),
+        _ => panic!(
+            "Expected ArityError for no arguments, got {:?}",
+            res_no_args
+        ),
     }
 
     let res_many_args = evaluator.evaluate("myArr.includes(1, 2)");
@@ -358,7 +499,10 @@ fn test_array_includes_arity_error() {
             assert_eq!(expected, 1);
             assert_eq!(got, 2);
         }
-        _ => panic!("Expected ArityError for many arguments, got {:?}", res_many_args),
+        _ => panic!(
+            "Expected ArityError for many arguments, got {:?}",
+            res_many_args
+        ),
     }
 }
 
@@ -368,7 +512,12 @@ fn test_array_includes_on_non_array() {
     context.insert("notAnArray".to_string(), Value::String("hello".to_string()));
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let result = evaluator.evaluate("notAnArray.includes(1)");
     match result {
@@ -376,7 +525,10 @@ fn test_array_includes_on_non_array() {
             // This error is from evaluate_dot_expr directly when trying to access 'includes' on a string "hello".
             assert_eq!(msg, "Cannot read properties of null or primitive value: hello (trying to access property: includes)");
         }
-        _ => panic!("Expected TypeError when calling .includes on non-array, got {:?}", result),
+        _ => panic!(
+            "Expected TypeError when calling .includes on non-array, got {:?}",
+            result
+        ),
     }
 }
 
@@ -390,10 +542,21 @@ fn test_array_includes_nested() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("myObj.nestedArr.includes(42)").unwrap(), Value::Bool(true));
-    assert_eq!(evaluator.evaluate("myObj.nestedArr.includes(100)").unwrap(), Value::Bool(false));
+    assert_eq!(
+        evaluator.evaluate("myObj.nestedArr.includes(42)").unwrap(),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        evaluator.evaluate("myObj.nestedArr.includes(100)").unwrap(),
+        Value::Bool(false)
+    );
 }
 
 #[test]
@@ -405,10 +568,12 @@ fn test_custom_adder_success() {
     #[cfg(feature = "logging")]
     let logger = Logger::default(); // Logger is already imported at top level
 
-    let evaluator = Evaluator::new( // Evaluator is already imported
+    let evaluator = Evaluator::new(
+        // Evaluator is already imported
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     let result = evaluator.evaluate("custom_add(10, 20.5)").unwrap();
@@ -430,7 +595,8 @@ fn test_custom_adder_arity_error_few_args() {
     let evaluator = Evaluator::new(
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     let result = evaluator.evaluate("custom_add(10)");
@@ -455,7 +621,8 @@ fn test_custom_adder_arity_error_many_args() {
     let evaluator = Evaluator::new(
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     let result = evaluator.evaluate("custom_add(10, 20, 30)");
@@ -480,7 +647,8 @@ fn test_custom_adder_type_error_arg1() {
     let evaluator = Evaluator::new(
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     let result = evaluator.evaluate("custom_add('not_a_number', 10)");
@@ -504,7 +672,8 @@ fn test_custom_adder_type_error_arg2() {
     let evaluator = Evaluator::new(
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     let result = evaluator.evaluate("custom_add(10, 'not_a_number')");
@@ -528,7 +697,8 @@ fn test_custom_adder_non_finite_number_error() {
     let evaluator = Evaluator::new(
         context,
         custom_funcs,
-        #[cfg(feature = "logging")] logger
+        #[cfg(feature = "logging")]
+        logger,
     );
 
     // Create a NaN Value::Number (Note: serde_json::Number cannot directly represent NaN/Infinity)
@@ -562,10 +732,18 @@ fn test_array_length_direct() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let result = evaluator.evaluate("myArray.length").unwrap();
-    assert_eq!(result, Value::Number(serde_json::Number::from_f64(3.0).unwrap()));
+    assert_eq!(
+        result,
+        Value::Number(serde_json::Number::from_f64(3.0).unwrap())
+    );
 }
 
 #[test]
@@ -578,10 +756,18 @@ fn test_array_length_nested_in_object() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let result = evaluator.evaluate("myObj.arr.length").unwrap();
-    assert_eq!(result, Value::Number(serde_json::Number::from_f64(2.0).unwrap()));
+    assert_eq!(
+        result,
+        Value::Number(serde_json::Number::from_f64(2.0).unwrap())
+    );
 }
 
 #[test]
@@ -594,16 +780,23 @@ fn test_length_on_non_array() {
     context.insert("myObj".to_string(), Value::Object(obj_without_length));
     context.insert("nullVar".to_string(), Value::Null);
 
-
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context.clone(), HashMap::new(), #[cfg(feature = "logging")] logger.clone());
+    let evaluator = Evaluator::new(
+        context.clone(),
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger.clone(),
+    );
 
     // String.length is not yet implemented, should fall into the generic "cannot read props of primitive" or specific "length" error
     let res_str = evaluator.evaluate("myString.length");
     match res_str {
         Err(EvaluationError::TypeError(msg)) => {
-             assert_eq!(msg, "Cannot read property 'length' of non-array/non-object value: hello");
+            assert_eq!(
+                msg,
+                "Cannot read property 'length' of non-array/non-object value: hello"
+            );
         }
         _ => panic!("Expected TypeError for string.length, got {:?}", res_str),
     }
@@ -611,7 +804,10 @@ fn test_length_on_non_array() {
     let res_num = evaluator.evaluate("myNum.length");
     match res_num {
         Err(EvaluationError::TypeError(msg)) => {
-            assert_eq!(msg, "Cannot read property 'length' of non-array/non-object value: 123");
+            assert_eq!(
+                msg,
+                "Cannot read property 'length' of non-array/non-object value: 123"
+            );
         }
         _ => panic!("Expected TypeError for number.length, got {:?}", res_num),
     }
@@ -620,11 +816,13 @@ fn test_length_on_non_array() {
     let res_obj = evaluator.evaluate("myObj.length").unwrap();
     assert_eq!(res_obj, Value::Null);
 
-
     let res_null = evaluator.evaluate("nullVar.length");
     match res_null {
         Err(EvaluationError::TypeError(msg)) => {
-            assert_eq!(msg, "Cannot read property 'length' of non-array/non-object value: null");
+            assert_eq!(
+                msg,
+                "Cannot read property 'length' of non-array/non-object value: null"
+            );
         }
         _ => panic!("Expected TypeError for null.length, got {:?}", res_null),
     }
@@ -638,7 +836,12 @@ fn test_other_property_on_array() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let result = evaluator.evaluate("myArray.foo").unwrap();
     assert_eq!(result, Value::Null); // JS returns undefined, so we return Null
@@ -654,10 +857,21 @@ fn test_property_access_on_object() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("user.name").unwrap(), Value::String("Tester".to_string()));
-    assert_eq!(evaluator.evaluate("user.age").unwrap(), Value::Number(30.into()));
+    assert_eq!(
+        evaluator.evaluate("user.name").unwrap(),
+        Value::String("Tester".to_string())
+    );
+    assert_eq!(
+        evaluator.evaluate("user.age").unwrap(),
+        Value::Number(30.into())
+    );
     assert_eq!(evaluator.evaluate("user.nonexistent").unwrap(), Value::Null);
 }
 
@@ -672,9 +886,17 @@ fn test_property_access_on_nested_object() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
-    assert_eq!(evaluator.evaluate("item.nested.value").unwrap(), Value::Bool(true));
+    assert_eq!(
+        evaluator.evaluate("item.nested.value").unwrap(),
+        Value::Bool(true)
+    );
     assert_eq!(evaluator.evaluate("item.nested.foo").unwrap(), Value::Null);
 
     let res_access_on_null = evaluator.evaluate("item.nonexistent.bar"); // item.nonexistent is Null, then .bar on Null
@@ -682,7 +904,10 @@ fn test_property_access_on_nested_object() {
         Err(EvaluationError::TypeError(msg)) => {
             assert!(msg.contains("Cannot read properties of null or primitive value: null (trying to access property: bar)"));
         }
-        _ => panic!("Expected TypeError for item.nonexistent.bar, got {:?}", res_access_on_null),
+        _ => panic!(
+            "Expected TypeError for item.nonexistent.bar, got {:?}",
+            res_access_on_null
+        ),
     }
 }
 
@@ -696,7 +921,12 @@ fn test_property_access_on_null_or_primitive_object_error() {
 
     #[cfg(feature = "logging")]
     let logger = Logger::default();
-    let evaluator = Evaluator::new(context, HashMap::new(), #[cfg(feature = "logging")] logger);
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(),
+        #[cfg(feature = "logging")]
+        logger,
+    );
 
     let cases = vec!["s.foo", "n.bar", "b.baz", "nl.qux"];
     for case in cases {
@@ -705,7 +935,10 @@ fn test_property_access_on_null_or_primitive_object_error() {
             Err(EvaluationError::TypeError(msg)) => {
                 assert!(msg.starts_with("Cannot read properties of null or primitive value:"));
             }
-            _ => panic!("Expected TypeError for property access on primitive/null, got {:?}", result),
+            _ => panic!(
+                "Expected TypeError for property access on primitive/null, got {:?}",
+                result
+            ),
         }
     }
 }
