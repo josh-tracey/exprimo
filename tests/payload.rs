@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use exprimo::Evaluator;
+    use exprimo::EvaluationError; // Added import
     use serde_json::Value;
     use std::collections::HashMap;
 
@@ -37,6 +38,7 @@ mod tests {
 
         let evaluator = Evaluator::new(
             to_json(&context),
+            HashMap::new(), // custom_functions
             #[cfg(feature = "logging")]
             logger,
         );
@@ -59,6 +61,7 @@ mod tests {
 
         let evaluator = Evaluator::new(
             to_json(&context),
+            HashMap::new(), // custom_functions
             #[cfg(feature = "logging")]
             logger,
         );
@@ -92,13 +95,28 @@ mod tests {
         let logger = Arc::new(Logger::default());
         let evaluator = Evaluator::new(
             context.clone().into_iter().collect(),
+            HashMap::new(), // custom_functions
             #[cfg(feature = "logging")]
             logger,
         );
 
-        let expr1 = "event.payload === null";
-        let res1 = evaluator.evaluate(expr1).unwrap();
-        assert_eq!(res1, serde_json::Value::Bool(true));
+        // Test for event.payload when event is Value::Null
+        // Accessing .payload on Value::Null should be a TypeError
+        let expr1_eval = evaluator.evaluate("event.payload");
+        match expr1_eval {
+            Err(EvaluationError::TypeError(msg)) => {
+                assert!(msg.contains("Cannot read properties of null or primitive value: null (trying to access property: payload)"));
+            }
+            _ => panic!("Expected TypeError for event.payload when event is null, got {:?}", expr1_eval),
+        }
+
+        // To test 'something === null' where something might be null due to object structure:
+        // Let's add a new context item for this specific test case if needed,
+        // or assert on a different part of the existing 'send_email' object.
+        // The original test 'event.payload === null' where event itself is Value::Null is problematic
+        // with strict property access as 'event.payload' itself errors.
+
+        // Test for send_email.status
         let expr2 = "send_email.status === \"success\"";
         let res2 = evaluator.evaluate(expr2).unwrap();
         assert_eq!(res2, serde_json::Value::Bool(true));

@@ -14,6 +14,7 @@ fn test_primitives() {
 
     let evaluator = Evaluator::new(
         context,
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
         logger,
     );
