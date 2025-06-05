@@ -14,6 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     ctx.insert("x".to_string(), serde_json::Value::Number(5.into()));
     let engine = exprimo::Evaluator::new(
         ctx,
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
         logger,
     );

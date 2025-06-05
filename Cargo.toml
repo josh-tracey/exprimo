@@ -19,6 +19,9 @@ serde = "~1"
 serde_json = "~1"
 serde_json_ctx = { version = "0.1.0", optional = true }
 thiserror = "~1"
+erasable = "=1.2.1" # Pinned for Rust 1.75.0 compatibility
+triomphe = "=0.1.9" # Pinned for Rust 1.75.0 compatibility
+slice-dst = "=1.5.0" # Pinned for Rust 1.75.0 compatibility
 
 [features]
 default = ["serde_json_ctx"]

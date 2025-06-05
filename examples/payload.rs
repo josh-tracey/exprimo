@@ -93,6 +93,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     add_context("send_email", r#"{"status": "success"}"#, &mut ctx);
     let engine = exprimo::Evaluator::new(
         to_json(&ctx),
+        HashMap::new(), // custom_functions
         #[cfg(feature = "logging")]
         logger,
     );
