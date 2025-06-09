@@ -79,7 +79,6 @@ dependencies = [
  "anyhow",
  "rslint_parser",
  "scribe-rust",
- "serde",
  "serde_json",
  "serde_json_ctx",
  "thiserror",
