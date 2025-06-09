@@ -141,7 +141,7 @@ mod tests {
                                                       // cus javascript coerces the float to an integer,
                                                       // as no decimal places are present so they
                                                       // are equal.
-        let res7 = evaluator.evaluate(expr3).unwrap();
+        let res7 = evaluator.evaluate(expr7).unwrap();
         assert_eq!(res7, serde_json::Value::Bool(true));
 
         let expr8 = "send_email.satcom.id === 12345.1"; // Testing with float comparison with
