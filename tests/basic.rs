@@ -177,6 +177,65 @@ impl CustomFunction for MyTestAdder {
     }
 }
 
+#[test]
+fn test_parenthesized_expressions() {
+    let mut context = HashMap::new();
+    context.insert("a".to_string(), serde_json::Value::Number(serde_json::Number::from_f64(1.0).unwrap()));
+    context.insert("b".to_string(), serde_json::Value::Number(serde_json::Number::from_f64(2.0).unwrap()));
+    context.insert("c".to_string(), serde_json::Value::Number(serde_json::Number::from_f64(3.0).unwrap()));
+    context.insert("d".to_string(), serde_json::Value::Number(serde_json::Number::from_f64(4.0).unwrap()));
+
+    #[cfg(feature = "logging")]
+    let logger = Logger::default();
+
+    let evaluator = Evaluator::new(
+        context,
+        HashMap::new(), // custom_functions
+        #[cfg(feature = "logging")]
+        logger,
+    );
+
+    // Simple case: (1 + 2) * 3 = 9
+    let expr1 = "(a + b) * c";
+    let res1 = evaluator.evaluate(expr1).unwrap();
+    assert_eq!(res1, serde_json::Value::Number(serde_json::Number::from_f64(9.0).unwrap()));
+
+    // Nested parentheses: ((1 + 2) * 3) / 4 = 2.25
+    let expr2 = "((a + b) * c) / d";
+    let res2 = evaluator.evaluate(expr2).unwrap();
+    assert_eq!(res2, serde_json::Value::Number(serde_json::Number::from_f64(2.25).unwrap()));
+
+    // More complex expression: ( (4-2) * ( (1+2)*3 ) ) / (10/5) = (2 * 9) / 2 = 9
+    // Using direct numbers for clarity here, assuming context a,b,c,d are not used or are shadowed by literals
+    let expr3 = "((d-b) * ((a+b)*c)) / (10/5)";
+    let res3 = evaluator.evaluate(expr3).unwrap();
+    assert_eq!(res3, serde_json::Value::Number(serde_json::Number::from_f64(9.0).unwrap()));
+
+    // Expression with unary operator
+    let expr4 = "-(a + b)";
+    let res4 = evaluator.evaluate(expr4).unwrap();
+    assert_eq!(res4, serde_json::Value::Number(serde_json::Number::from_f64(-3.0).unwrap()));
+
+    // Expression with unary operator inside parentheses
+    let expr5 = "c * (-a - b)"; // 3 * (-1 - 2) = 3 * (-3) = -9
+    let res5 = evaluator.evaluate(expr5).unwrap();
+    assert_eq!(res5, serde_json::Value::Number(serde_json::Number::from_f64(-9.0).unwrap()));
+
+    // Expression with boolean logic
+    let expr6 = "(a < b) && (c > d)"; // (1 < 2) && (3 > 4) -> true && false -> false
+    let res6 = evaluator.evaluate(expr6).unwrap();
+    assert_eq!(res6, serde_json::Value::Bool(false));
+
+    // Expression with boolean logic and parentheses for precedence
+    let expr7 = "a < b && c > d || a == 1"; // (1<2 && 3>4) || 1==1 -> (true && false) || true -> false || true -> true
+    let res7 = evaluator.evaluate(expr7).unwrap();
+    assert_eq!(res7, serde_json::Value::Bool(true));
+
+    let expr8 = "a < b && (c > d || a == 1)"; // 1<2 && (3>4 || 1==1) -> true && (false || true) -> true && true -> true
+    let res8 = evaluator.evaluate(expr8).unwrap();
+    assert_eq!(res8, serde_json::Value::Bool(true));
+}
+
 // --- Object.hasOwnProperty() Tests ---
 
 #[test]
