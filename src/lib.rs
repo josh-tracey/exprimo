@@ -4,7 +4,7 @@ use std::sync::Arc;   // For Arc<dyn CustomFunction>
 use serde_json::Value;
 use thiserror::Error;
 use rslint_parser::{
-    ast::{BinExpr, BinOp, CondExpr, DotExpr, Expr, Name, NameRef, UnaryExpr, UnaryOp, CallExpr}, // Removed ExprOrSpread
+    ast::{BinExpr, BinOp, CondExpr, DotExpr, Expr, Name, NameRef, UnaryExpr, UnaryOp, CallExpr, GroupingExpr}, // Removed ExprOrSpread
     parse_text, AstNode, SyntaxKind, SyntaxNode,
 };
 #[cfg(feature = "logging")]
@@ -145,6 +145,14 @@ impl Evaluator {
             }
             SyntaxKind::CALL_EXPR => {
                 self.evaluate_call_expr(&CallExpr::cast(node.clone()).unwrap())
+            }
+            SyntaxKind::GROUPING_EXPR => {
+                let grouping_expr = GroupingExpr::cast(node.clone()).unwrap();
+                let inner_expr = grouping_expr.inner().ok_or_else(|| EvaluationError::Node(NodeError {
+                    message: "Missing inner expression in grouping expression".to_string(),
+                    node: Some(node.clone()),
+                }))?;
+                self.evaluate_node(inner_expr.syntax())
             }
             // Handle simple array and object literals
             SyntaxKind::ARRAY_EXPR => {
