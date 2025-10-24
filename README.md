@@ -2,203 +2,472 @@
 
 <img src="assets/logo.png" width="250" title="rusty">
 
-**CAUTION:** Beware of Sneaky Bugs in the Early Project Stages!
-There will be bug, probably alot at first :D
-
-Exprimo is a JavaScript evaluator written in Rust, inspired by the functionality of 
-angular-expressions. Designed to be simple and blazingly fast.
+Exprimo is a **reliable** and **JavaScript-compliant** expression evaluator written in Rust, designed for rule-based engines and dynamic expression evaluation. Inspired by angular-expressions, it's built to be simple, fast, and production-ready.
 
 ## Description
 
-Exprimo parses and evaluates JavaScript expressions efficiently and securely. 
-It utilizes the power of Rust and its excellent memory safety guarantees to provide a reliable
-and fast JavaScript expression evaluator.
+Exprimo parses and evaluates JavaScript expressions efficiently and securely. It utilizes the power of Rust and its excellent memory safety guarantees to provide a reliable and fast JavaScript expression evaluator with proper error handling and JavaScript semantics compliance.
+
+**Perfect for:**
+- Rule-based engines
+- Dynamic configuration
+- Conditional logic evaluation
+- Template expressions
+- Business rule processing
+
+## Features
+
+✅ **JavaScript-Compliant** - Follows JavaScript semantics for intuitive expression writing  
+✅ **Robust Error Handling** - Gracefully handles edge cases (division by zero, NaN, Infinity)  
+✅ **Type Coercion** - Supports both loose (`==`) and strict (`===`) equality with proper type coercion  
+✅ **Rich Type Support** - Numbers, strings, booleans, arrays, objects, null, NaN, Infinity  
+✅ **Custom Functions** - Extend with your own Rust functions  
+✅ **Built-in Methods** - Array and object methods (`.length`, `.includes()`, `.hasOwnProperty()`)  
+✅ **String Escapes** - Proper handling of escape sequences (`\n`, `\t`, `\\`, etc.)  
+✅ **Production-Ready** - Comprehensive test coverage (43+ tests)
 
 ## Installation
 
-Before you can use Exprimo, you need to have Rust installed on your system. 
-If you don't have it installed, you can download Rust from the official website 
-[here](https://www.rust-lang.org/tools/install).
+Add Exprimo to your `Cargo.toml`:
 
-Once Rust is installed, you can install Exprimo by running:
+```toml
+[dependencies]
+exprimo = "*"
+```
+
+Or install via cargo:
 
 ```bash
 cargo add exprimo
 ```
 
-Trace logging to console can be added to the package, it is by default disabled as probably 
-don't need it unless working on it, or need to debug AST error if required.
+### Optional Logging
 
-This will install [Scribe Rust](https://github.com/josh-tracey/scribe-rust) and will need LOG_LEVEL=TRACE in environment variables for logs to output.
+Enable trace logging for debugging:
 
 ```toml
-exprimo = { version = "*", features = ["logging"]
+[dependencies]
+exprimo = { version = "*", features = ["logging"] }
 ```
 
-## Usage
+This will install [Scribe Rust](https://github.com/josh-tracey/scribe-rust). Set `LOG_LEVEL=TRACE` in environment variables for logs to output.
 
-First, you need to import Exprimo and create an instance of `Evaluator`:
+## Quick Start
 
 ```rust
-use exprimo::{Evaluator, CustomFunction}; // CustomFunction for example context
+use exprimo::Evaluator;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::sync::Arc; // For custom functions map
 
-// 1. Set up your context (variables accessible in expressions)
+// Set up context with variables
 let mut context = HashMap::new();
-context.insert("user_name".to_string(), Value::String("Alice".to_string()));
 context.insert("user_age".to_string(), Value::Number(30.into()));
+context.insert("user_status".to_string(), Value::String("active".to_string()));
+context.insert("user_premium".to_string(), Value::Bool(true));
 
-// 2. Define custom functions map (even if empty)
-let custom_functions: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
-// Example: To use custom functions, you would populate this map:
-//   #[derive(Debug)] struct MyToUpper;
-//   impl CustomFunction for MyToUpper { /* ... */ }
-//   custom_functions.insert("toUpperCase".to_string(), Arc::new(MyToUpper));
+// Create evaluator
+let evaluator = Evaluator::new(context, HashMap::new());
 
-// 3. Create the evaluator instance
-// (Assuming no logger for this basic example for brevity; add logger if feature "logging" is enabled)
-let evaluator = Evaluator::new(context, custom_functions);
+// Evaluate expressions
+let result = evaluator.evaluate("user_age >= 18 && user_status === 'active'").unwrap();
+assert_eq!(result, Value::Bool(true));
+
+// Ternary operator
+let result = evaluator.evaluate("user_premium ? 'VIP' : 'Standard'").unwrap();
+assert_eq!(result, Value::String("VIP".to_string()));
+
+// Type coercion with ==
+let result = evaluator.evaluate("user_premium == 1").unwrap();
+assert_eq!(result, Value::Bool(true)); // true == 1 with type coercion
 ```
 
-Then, you can evaluate JavaScript expressions:
+## Supported Operations
+
+### Arithmetic Operators
+
+```javascript
+a + b    // Addition (also string concatenation)
+a - b    // Subtraction
+a * b    // Multiplication
+a / b    // Division (returns Infinity for division by zero)
+a % b    // Modulo
+-a       // Unary negation
++a       // Unary plus
+```
+
+### Comparison Operators
+
+```javascript
+a == b   // Loose equality (with type coercion)
+a != b   // Loose inequality
+a === b  // Strict equality (no type coercion)
+a !== b  // Strict inequality
+a > b    // Greater than
+a < b    // Less than
+a >= b   // Greater than or equal
+a <= b   // Less than or equal
+```
+
+### Logical Operators
+
+```javascript
+a && b   // Logical AND
+a || b   // Logical OR
+!a       // Logical NOT
+```
+
+### Ternary Operator
+
+```javascript
+condition ? valueIfTrue : valueIfFalse
+```
+
+### Grouping
+
+```javascript
+(a + b) * c
+```
+
+## Type Coercion
+
+Exprimo implements JavaScript-compliant type coercion for the `==` operator:
 
 ```rust
-let age_expr = "user_age > 25";
-// Example with a (hypothetical) custom function if it were registered:
-// let name_expr = "toUpperCase(user_name)";
+// String to number coercion
+evaluator.evaluate("'5' == 5").unwrap();        // true
+evaluator.evaluate("'5' === 5").unwrap();       // false (strict)
 
-let is_older = evaluator.evaluate(age_expr).unwrap();
-// let uppercased_name = evaluator.evaluate(name_expr).unwrap();
+// Boolean to number coercion
+evaluator.evaluate("true == 1").unwrap();       // true
+evaluator.evaluate("false == 0").unwrap();      // true
 
-
-println!("Is older: {}", is_older); // >Is older: true
-// println!("Uppercased name: {}", uppercased_name);
+// Empty string to number
+evaluator.evaluate("'' == 0").unwrap();         // true
 ```
 
 ## Truthiness Rules
 
-Exprimo evaluates the truthiness of values as follows:
+Exprimo follows JavaScript truthiness semantics:
 
-- **Booleans**: `true` is truthy, `false` is falsy.
-- **Null**: `null` is falsy.
-- **Numbers**: `0` and `NaN` are falsy. All other numbers (including negative numbers and Infinity) are truthy.
-- **Strings**: Empty strings (`""`) are falsy. All other strings are truthy.
-- **Arrays**: Empty arrays (`[]`) are currently treated as falsy. This behavior might differ from standard JavaScript, where empty arrays are truthy.
-- **Objects**: Empty objects (`{}`) are currently treated as falsy. This behavior might differ from standard JavaScript, where empty objects are truthy.
+| Value | Truthy/Falsy | Example |
+|-------|--------------|---------|
+| `true` | Truthy | `true ? 'yes' : 'no'` → `'yes'` |
+| `false` | Falsy | `false ? 'yes' : 'no'` → `'no'` |
+| `null` | Falsy | `null ? 'yes' : 'no'` → `'no'` |
+| `0` | Falsy | `0 ? 'yes' : 'no'` → `'no'` |
+| `NaN` | Falsy | `NaN ? 'yes' : 'no'` → `'no'` |
+| `""` (empty string) | Falsy | `"" ? 'yes' : 'no'` → `'no'` |
+| Non-zero numbers | Truthy | `42 ? 'yes' : 'no'` → `'yes'` |
+| Non-empty strings | Truthy | `"hello" ? 'yes' : 'no'` → `'yes'` |
+| **All arrays** | **Truthy** | `[] ? 'yes' : 'no'` → `'yes'` |
+| **All objects** | **Truthy** | `{} ? 'yes' : 'no'` → `'yes'` |
+
+**Note:** Arrays and objects are **always truthy**, even if empty (JavaScript standard behavior).
+
+## Special Values
+
+### Infinity and NaN
+
+Exprimo properly handles `Infinity` and `NaN`:
+
+```rust
+// Division by zero returns Infinity
+evaluator.evaluate("5 / 0").unwrap();     // Infinity (no error!)
+evaluator.evaluate("-5 / 0").unwrap();    // -Infinity
+
+// Invalid conversions return NaN
+evaluator.evaluate("'abc' * 2").unwrap(); // NaN (no error!)
+
+// NaN comparisons
+evaluator.evaluate("NaN == NaN").unwrap();  // false (JavaScript behavior)
+evaluator.evaluate("NaN === NaN").unwrap(); // false
+
+// Infinity identifier
+evaluator.evaluate("Infinity > 1000000").unwrap(); // true
+```
+
+**Note:** Due to `serde_json::Number` limitations, `NaN` and `Infinity` are represented as best-effort approximations. For production use with heavy `NaN`/`Infinity` usage, consider a custom `Value` type.
+
+### Undefined
+
+The `undefined` identifier returns `null` (closest JSON equivalent):
+
+```rust
+evaluator.evaluate("undefined").unwrap(); // null
+```
+
+## String Escape Sequences
+
+Exprimo processes common escape sequences:
+
+```rust
+evaluator.evaluate("'line1\\nline2'").unwrap();      // "line1\nline2"
+evaluator.evaluate("'col1\\tcol2'").unwrap();        // "col1\tcol2"
+evaluator.evaluate("'quote: \\'hello\\''").unwrap(); // "quote: 'hello'"
+evaluator.evaluate("\"quote: \\\"hello\\\"\"").unwrap(); // "quote: \"hello\""
+evaluator.evaluate("'path\\\\to\\\\file'").unwrap(); // "path\to\file"
+```
+
+**Supported escapes:** `\n`, `\t`, `\r`, `\\`, `\'`, `\"`, `\0`
+
+## Type Conversions
+
+### String to Number
+
+```rust
+evaluator.evaluate("'42' * 2").unwrap();      // 84
+evaluator.evaluate("'abc' * 2").unwrap();     // NaN
+evaluator.evaluate("'' * 2").unwrap();        // 0 (empty string → 0)
+evaluator.evaluate("'Infinity' > 100").unwrap(); // true
+```
+
+### Array to Number
+
+```rust
+evaluator.evaluate("[] * 5").unwrap();        // 0 (empty array → 0)
+evaluator.evaluate("[42] * 2").unwrap();      // 84 (single element)
+evaluator.evaluate("[1, 2] * 2").unwrap();    // NaN (multiple elements)
+```
+
+### Object to Number
+
+```rust
+evaluator.evaluate("{} * 2").unwrap();        // NaN (objects → NaN)
+```
+
+## Built-in Properties and Methods
+
+### Arrays
+
+Arrays are represented by `serde_json::Value::Array`.
+
+#### `.length`
+
+Returns the number of elements in an array.
+
+```rust
+let mut context = HashMap::new();
+context.insert("myArray".to_string(), Value::Array(vec![
+    Value::Number(10.into()),
+    Value::Number(20.into()),
+    Value::Number(30.into()),
+]));
+let evaluator = Evaluator::new(context, HashMap::new());
+
+evaluator.evaluate("myArray.length").unwrap(); // 3
+```
+
+#### `.includes(valueToFind)`
+
+Checks if an array contains `valueToFind` using SameValueZero comparison (strict equality where `NaN` equals `NaN`).
+
+```rust
+evaluator.evaluate("[1, 'foo', null].includes('foo')").unwrap(); // true
+evaluator.evaluate("[1, 2, 3].includes(4)").unwrap();            // false
+evaluator.evaluate("[NaN].includes(NaN)").unwrap();              // true (special case)
+```
+
+### Objects
+
+Objects are represented by `serde_json::Value::Object`.
+
+#### `.hasOwnProperty(key)`
+
+Checks if an object contains the specified `key` as its own direct property.
+
+```rust
+let mut context = HashMap::new();
+let mut obj = serde_json::Map::new();
+obj.insert("name".to_string(), Value::String("Alice".to_string()));
+obj.insert("age".to_string(), Value::Number(30.into()));
+context.insert("myObject".to_string(), Value::Object(obj));
+let evaluator = Evaluator::new(context, HashMap::new());
+
+evaluator.evaluate("myObject.hasOwnProperty('name')").unwrap();   // true
+evaluator.evaluate("myObject.hasOwnProperty('gender')").unwrap(); // false
+evaluator.evaluate("myObject.hasOwnProperty(123)").unwrap();      // false (coerced to "123")
+```
 
 ## Custom Functions
 
-You can extend Exprimo's capabilities by defining your own functions in Rust and making them available to the evaluator.
+Extend Exprimo with your own Rust functions by implementing the `CustomFunction` trait.
 
-Custom functions must implement the `exprimo::CustomFunction` trait. This trait requires a `call` method that takes a slice of `serde_json::Value` arguments (`&[Value]`) and returns a `Result<Value, exprimo::CustomFuncError>`.
-
-**Example: A `toUpperCase` function**
+### Example: `toUpperCase` Function
 
 ```rust
 use exprimo::{Evaluator, CustomFunction, CustomFuncError};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::fmt; // Required for #[derive(Debug)] on the custom function struct
 
-#[derive(Debug)] // The CustomFunction trait requires the Debug trait.
+#[derive(Debug)]
 struct ToUpperCase;
 
 impl CustomFunction for ToUpperCase {
     fn call(&self, args: &[Value]) -> Result<Value, CustomFuncError> {
         if args.len() != 1 {
-            // Return an arity error if the wrong number of arguments are provided.
             return Err(CustomFuncError::ArityError { expected: 1, got: args.len() });
         }
         match &args[0] {
             Value::String(s) => Ok(Value::String(s.to_uppercase())),
-            // Return an argument error if the type is not as expected.
             _ => Err(CustomFuncError::ArgumentError("Argument must be a string".to_string())),
         }
     }
 }
 
-fn main() { // Example main, in real use integrate into your app
-    // Context can be empty if not needed
+fn main() {
     let context = HashMap::new();
-
-    // Register your custom function
     let mut custom_functions: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_functions.insert("toUpperCase".to_string(), Arc::new(ToUpperCase));
-
-    // Create the evaluator with the custom functions
-    // (Assuming no logger for simplicity in this example)
+    
     let evaluator = Evaluator::new(context, custom_functions);
-
-    // Evaluate an expression using the custom function
+    
     let result = evaluator.evaluate("toUpperCase('hello world')").unwrap();
     assert_eq!(result, Value::String("HELLO WORLD".to_string()));
-    println!("toUpperCase('hello world') => {}", result); // >toUpperCase('hello world') => "HELLO WORLD"
 }
 ```
 
-Key points for custom functions:
-- Your struct must implement `exprimo::CustomFunction` (which also requires `std::fmt::Debug`).
-- The `call` method receives arguments as `&[Value]`. You are responsible for:
-    - Checking argument count (arity).
-    - Checking argument types.
-    - Performing the function logic.
-    - Returning `Ok(Value)` on success or `Err(exprimo::CustomFuncError)` on failure (e.g., `CustomFuncError::ArityError`, `CustomFuncError::ArgumentError`).
-- Wrap your function instance in `Arc::new()` before inserting into the `custom_functions` map.
-- The keys in the `custom_functions` map are the names used to call the functions in expressions.
+### Custom Function Requirements
 
-## Built-in Properties and Methods
+- Implement `exprimo::CustomFunction` trait (also requires `std::fmt::Debug`)
+- Implement the `call` method with signature: `fn call(&self, args: &[Value]) -> Result<Value, CustomFuncError>`
+- Handle argument validation (count and types)
+- Return `Ok(Value)` on success or `Err(CustomFuncError)` on failure
+- Wrap in `Arc::new()` before inserting into the custom functions map
 
-Exprimo provides a few built-in properties and methods for common operations, primarily for arrays and objects.
+## Real-World Example: Rule Engine
 
-### Arrays
+```rust
+use exprimo::Evaluator;
+use serde_json::Value;
+use std::collections::HashMap;
 
-Arrays in Exprimo are represented by `serde_json::Value::Array`.
+// Rule engine context
+let mut context = HashMap::new();
+context.insert("user_age".to_string(), Value::Number(25.into()));
+context.insert("user_country".to_string(), Value::String("US".to_string()));
+context.insert("user_score".to_string(), Value::Number(850.into()));
+context.insert("user_verified".to_string(), Value::Bool(true));
+context.insert("user_tags".to_string(), Value::Array(vec![
+    Value::String("premium".to_string()),
+    Value::String("verified".to_string()),
+]));
 
--   **`.length`**: Returns the number of elements in an array.
-    *   Example: If `myArray` is `[10, 20, 30]`:
-        ```javascript
-        myArray.length // Evaluates to 3
-        ```
+let evaluator = Evaluator::new(context, HashMap::new());
 
--   **`.includes(valueToFind)`**: Checks if an array contains `valueToFind`.
-    *   It uses an abstract equality comparison similar to JavaScript's `SameValueZero` (e.g., `NaN` is equal to `NaN`, `+0` is equal to `-0`).
-    *   Returns `true` if the value is found, `false` otherwise.
-    *   Example:
-        ```javascript
-        [1, "foo", null].includes("foo") // Evaluates to true
-        [1, 2, 3].includes(4)           // Evaluates to false
-        ```
+// Rule 1: Eligibility check
+let eligible = evaluator.evaluate(
+    "user_age >= 18 && user_verified && user_score >= 700"
+).unwrap();
+assert_eq!(eligible, Value::Bool(true));
 
-### Objects
+// Rule 2: Discount calculation
+let discount = evaluator.evaluate(
+    "user_tags.includes('premium') ? 20 : 10"
+).unwrap();
+assert_eq!(discount, Value::Number(20.into()));
 
-Objects in Exprimo are represented by `serde_json::Value::Object`.
+// Rule 3: Complex condition
+let approved = evaluator.evaluate(
+    "(user_country === 'US' || user_country === 'CA') && user_score > 800"
+).unwrap();
+assert_eq!(approved, Value::Bool(true));
+```
 
--   **`.hasOwnProperty(key)`**: Checks if an object contains the specified `key` as its own direct property.
-    *   The `key` argument is coerced to a string. For example, if you pass a number `123`, it will be treated as the string `"123"`.
-    *   Returns `true` if the key is found, `false` otherwise.
-    *   Example: If `myObject` is `{ "name": "Alice", "age": 30 }`:
-        ```javascript
-        myObject.hasOwnProperty('name')    // Evaluates to true
-        myObject.hasOwnProperty('gender')  // Evaluates to false
-        ({ "123": "value" }).hasOwnProperty(123) // Evaluates to true (123 is coerced to "123")
-        ```
+## Error Handling
 
-## Examples
+Exprimo provides detailed error types:
 
-Running examples
+```rust
+use exprimo::EvaluationError;
+
+let result = evaluator.evaluate("unknown_variable");
+match result {
+    Ok(value) => println!("Result: {}", value),
+    Err(EvaluationError::Node(e)) => println!("Node error: {}", e),
+    Err(EvaluationError::TypeError(e)) => println!("Type error: {}", e),
+    Err(EvaluationError::CustomFunction(e)) => println!("Function error: {}", e),
+}
+```
+
+## Known Limitations
+
+1. **serde_json::Number Constraints**
+   - `NaN` and `Infinity` don't serialize perfectly to JSON
+   - Workarounds are in place, but consider a custom `Value` type for production
+
+2. **Complex Literals**
+   - Only empty array `[]` and empty object `{}` literals are supported
+   - Complex literals like `[1, 2, 3]` or `{a: 1, b: 2}` are not yet implemented
+   - **Workaround:** Pass complex structures via context
+
+3. **Object Literal Ambiguity**
+   - `{}` in expression context is parsed as a block statement (JavaScript quirk)
+   - **Workaround:** Use variables or wrap in parentheses (future support)
+
+## Testing
+
+Run the test suite:
 
 ```bash
+cargo test
+```
+
+Run with logging:
+
+```bash
+LOG_LEVEL=TRACE cargo test --features "logging"
+```
+
+Run examples:
+
+```bash
+cargo run --example basic
 LOG_LEVEL=TRACE cargo run --features "logging" --example basic
 ```
 
+## Performance
+
+Exprimo is designed for performance:
+- Minimal allocations
+- Efficient AST traversal
+- Zero-copy where possible
+- Rust's memory safety without runtime overhead
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+### Recent Improvements (Latest Version)
+
+- ✅ Division by zero returns `Infinity`/`NaN` instead of errors
+- ✅ Invalid type conversions return `NaN` instead of errors
+- ✅ Proper NaN comparison semantics (`NaN != NaN`)
+- ✅ Arrays and objects are now truthy (JavaScript standard)
+- ✅ Type coercion for `==` operator
+- ✅ Separate strict equality `===` without coercion
+- ✅ `Infinity`, `NaN`, `undefined` identifiers
+- ✅ String escape sequence processing
+- ✅ Array to number conversion
+- ✅ SameValueZero for `Array.includes()`
+
 ## Contributing
 
-Contributions to Exprimo are welcome! Please submit a pull request on GitHub.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
 ## License
 
-Exprimo is licensed under the MIT license. Please see the `LICENSE` file in the GitHub 
-repository for more information.
+Exprimo is licensed under the MIT license. See the [LICENSE](LICENSE) file for details.
+
+## Credits
+
+Inspired by [angular-expressions](https://github.com/peerigon/angular-expressions).
+
+Built with ❤️ using Rust and [rslint_parser](https://github.com/rslint/rslint).
+

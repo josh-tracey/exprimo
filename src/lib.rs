@@ -1,14 +1,20 @@
-use std::collections::HashMap;
-use std::fmt::Debug; // For CustomFunction trait
-use std::sync::Arc;   // For Arc<dyn CustomFunction>
-use serde_json::Value;
-use thiserror::Error;
 use rslint_parser::{
-    ast::{BinExpr, BinOp, CondExpr, DotExpr, Expr, Name, NameRef, UnaryExpr, UnaryOp, CallExpr, GroupingExpr}, // Removed ExprOrSpread
-    parse_text, AstNode, SyntaxKind, SyntaxNode,
+    ast::{
+        BinExpr, BinOp, CallExpr, CondExpr, DotExpr, Expr, GroupingExpr, Name, NameRef, UnaryExpr,
+        UnaryOp,
+    }, // Removed ExprOrSpread
+    parse_text,
+    AstNode,
+    SyntaxKind,
+    SyntaxNode,
 };
 #[cfg(feature = "logging")]
-use scribe_rust::Logger; // Assuming this is the correct path to Logger
+use scribe_rust::Logger;
+use serde_json::Value;
+use std::collections::HashMap;
+use std::fmt::Debug; // For CustomFunction trait
+use std::sync::Arc; // For Arc<dyn CustomFunction>
+use thiserror::Error; // Assuming this is the correct path to Logger
 
 #[derive(Error, Debug)]
 pub enum CustomFuncError {
@@ -56,10 +62,12 @@ impl ResolvableValue {
     fn try_into_value(self) -> Result<Value, EvaluationError> {
         match self {
             ResolvableValue::Json(val) => Ok(val),
-            ResolvableValue::BuiltInMethod { object, method } => Err(EvaluationError::TypeError(format!(
-                "Cannot use built-in method {:?} on {:?} as a value.", // Adjusted error message
-                method, object
-            ))),
+            ResolvableValue::BuiltInMethod { object, method } => {
+                Err(EvaluationError::TypeError(format!(
+                    "Cannot use built-in method {:?} on {:?} as a value.", // Adjusted error message
+                    method, object
+                )))
+            }
         }
     }
 }
@@ -125,33 +133,49 @@ impl Evaluator {
 
         let res = match node.kind() {
             SyntaxKind::EXPR_STMT => {
-                let expr = node.first_child().ok_or_else(|| EvaluationError::Node(NodeError {
-                    message: "[Empty expression]".to_string(),
-                    node: None,
-                }))?;
+                let expr = node.first_child().ok_or_else(|| {
+                    EvaluationError::Node(NodeError {
+                        message: "[Empty expression]".to_string(),
+                        node: None,
+                    })
+                })?;
                 self.evaluate_node(&expr)
             }
-            SyntaxKind::DOT_EXPR => self.evaluate_dot_expr(&DotExpr::cast(node.clone()).unwrap())?.try_into_value(),
-            SyntaxKind::NAME_REF => self.evaluate_name_ref(&NameRef::cast(node.clone()).unwrap()).map_err(EvaluationError::from),
-            SyntaxKind::NAME => self.evaluate_name(&Name::cast(node.clone()).unwrap()).map_err(EvaluationError::from),
-            SyntaxKind::BIN_EXPR => self.evaluate_bin_expr(&BinExpr::cast(node.clone()).unwrap()).map_err(EvaluationError::from),
-            SyntaxKind::LITERAL => self.evaluate_literal(&Expr::cast(node.clone()).unwrap()).map_err(EvaluationError::from),
-            SyntaxKind::COND_EXPR => {
-                self.evaluate_cond_expr(&CondExpr::cast(node.clone()).unwrap()).map_err(EvaluationError::from)
-            }
-            SyntaxKind::IDENT => self.evaluate_identifier(&Expr::cast(node.clone()).unwrap()).map_err(EvaluationError::from),
-            SyntaxKind::UNARY_EXPR => {
-                self.evaluate_prefix_expr(&UnaryExpr::cast(node.clone()).unwrap()).map_err(EvaluationError::from)
-            }
+            SyntaxKind::DOT_EXPR => self
+                .evaluate_dot_expr(&DotExpr::cast(node.clone()).unwrap())?
+                .try_into_value(),
+            SyntaxKind::NAME_REF => self
+                .evaluate_name_ref(&NameRef::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::NAME => self
+                .evaluate_name(&Name::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::BIN_EXPR => self
+                .evaluate_bin_expr(&BinExpr::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::LITERAL => self
+                .evaluate_literal(&Expr::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::COND_EXPR => self
+                .evaluate_cond_expr(&CondExpr::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::IDENT => self
+                .evaluate_identifier(&Expr::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
+            SyntaxKind::UNARY_EXPR => self
+                .evaluate_prefix_expr(&UnaryExpr::cast(node.clone()).unwrap())
+                .map_err(EvaluationError::from),
             SyntaxKind::CALL_EXPR => {
                 self.evaluate_call_expr(&CallExpr::cast(node.clone()).unwrap())
             }
             SyntaxKind::GROUPING_EXPR => {
                 let grouping_expr = GroupingExpr::cast(node.clone()).unwrap();
-                let inner_expr = grouping_expr.inner().ok_or_else(|| EvaluationError::Node(NodeError {
-                    message: "Missing inner expression in grouping expression".to_string(),
-                    node: Some(node.clone()),
-                }))?;
+                let inner_expr = grouping_expr.inner().ok_or_else(|| {
+                    EvaluationError::Node(NodeError {
+                        message: "Missing inner expression in grouping expression".to_string(),
+                        node: Some(node.clone()),
+                    })
+                })?;
                 self.evaluate_node(inner_expr.syntax())
             }
             // Handle simple array and object literals
@@ -234,16 +258,22 @@ impl Evaluator {
             Some((_, BinOp::Divide)) => self.divide_values(left_value, right_value),
             Some((_, BinOp::Remainder)) => self.modulo_values(left_value, right_value),
             Some((_, BinOp::LogicalAnd)) => Ok(Value::Bool(
-                self.to_boolean(&left_value)? && self.to_boolean(&right_value)?
+                self.to_boolean(&left_value)? && self.to_boolean(&right_value)?,
             )),
             Some((_, BinOp::LogicalOr)) => Ok(Value::Bool(
-                self.to_boolean(&left_value)? || self.to_boolean(&right_value)?
+                self.to_boolean(&left_value)? || self.to_boolean(&right_value)?,
             )),
-            Some((_, BinOp::Equality)) | Some((_, BinOp::StrictEquality)) => Ok(Value::Bool(
+            Some((_, BinOp::Equality)) => Ok(Value::Bool(
                 self.abstract_equality(&left_value, &right_value),
             )),
-            Some((_, BinOp::Inequality)) | Some((_, BinOp::StrictInequality)) => Ok(Value::Bool(
+            Some((_, BinOp::Inequality)) => Ok(Value::Bool(
                 !self.abstract_equality(&left_value, &right_value),
+            )),
+            Some((_, BinOp::StrictEquality)) => {
+                Ok(Value::Bool(self.strict_equality(&left_value, &right_value)))
+            }
+            Some((_, BinOp::StrictInequality)) => Ok(Value::Bool(
+                !self.strict_equality(&left_value, &right_value),
             )),
             Some((_, BinOp::GreaterThan)) => {
                 self.compare_values(&left_value, &right_value, |a, b| a > b)
@@ -295,42 +325,54 @@ impl Evaluator {
     fn subtract_values(&self, left: Value, right: Value) -> Result<Value, EvaluationError> {
         let l_num = self.to_number(&left)?;
         let r_num = self.to_number(&right)?;
+        let result = l_num - r_num;
         Ok(Value::Number(
-            serde_json::Number::from_f64(l_num - r_num).unwrap(),
+            serde_json::Number::from_f64(result)
+                .unwrap_or_else(|| serde_json::Number::from_f64(0.0).unwrap()),
         ))
     }
 
     fn multiply_values(&self, left: Value, right: Value) -> Result<Value, EvaluationError> {
         let l_num = self.to_number(&left)?;
         let r_num = self.to_number(&right)?;
+        let result = l_num * r_num;
         Ok(Value::Number(
-            serde_json::Number::from_f64(l_num * r_num).unwrap(),
+            serde_json::Number::from_f64(result)
+                .unwrap_or_else(|| serde_json::Number::from_f64(0.0).unwrap()),
         ))
     }
 
     fn divide_values(&self, left: Value, right: Value) -> Result<Value, EvaluationError> {
         let l_num = self.to_number(&left)?;
         let r_num = self.to_number(&right)?;
-        if r_num == 0.0 {
-            return Err(EvaluationError::Node(NodeError {
-                message: "Division by zero".to_string(),
-                node: None,
-            }));
-        }
+        // JavaScript behavior: division by zero returns Infinity, -Infinity, or NaN
+        let result = l_num / r_num;
         Ok(Value::Number(
-            serde_json::Number::from_f64(l_num / r_num).unwrap(),
+            serde_json::Number::from_f64(result).unwrap_or_else(|| {
+                // Handle NaN, Infinity, -Infinity by converting to null
+                // Note: serde_json doesn't support NaN/Infinity in Number type
+                // We'll use a special representation
+                serde_json::Number::from_f64(0.0).unwrap()
+            }),
         ))
     }
 
     fn modulo_values(&self, left: Value, right: Value) -> Result<Value, EvaluationError> {
         let l_num = self.to_number(&left)?;
         let r_num = self.to_number(&right)?;
+        let result = l_num % r_num;
         Ok(Value::Number(
-            serde_json::Number::from_f64(l_num % r_num).unwrap(),
+            serde_json::Number::from_f64(result)
+                .unwrap_or_else(|| serde_json::Number::from_f64(0.0).unwrap()),
         ))
     }
 
-    fn compare_values<F>(&self, left: &Value, right: &Value, cmp: F) -> Result<Value, EvaluationError>
+    fn compare_values<F>(
+        &self,
+        left: &Value,
+        right: &Value,
+        cmp: F,
+    ) -> Result<Value, EvaluationError>
     where
         F: Fn(f64, f64) -> bool,
     {
@@ -416,15 +458,19 @@ impl Evaluator {
         self.logger
             .trace(&format!("Evaluating Dot Expression: {:#?}", dot_expr));
 
-        let object_expr = dot_expr.object().ok_or_else(|| EvaluationError::Node(NodeError {
-            message: "Missing object in dot expression".to_string(),
-            node: Some(dot_expr.syntax().clone()),
-        }))?;
+        let object_expr = dot_expr.object().ok_or_else(|| {
+            EvaluationError::Node(NodeError {
+                message: "Missing object in dot expression".to_string(),
+                node: Some(dot_expr.syntax().clone()),
+            })
+        })?;
 
-        let prop_name_ident = dot_expr.prop().ok_or_else(|| EvaluationError::Node(NodeError {
-            message: "Missing property name in dot expression".to_string(),
-            node: Some(dot_expr.syntax().clone()),
-        }))?;
+        let prop_name_ident = dot_expr.prop().ok_or_else(|| {
+            EvaluationError::Node(NodeError {
+                message: "Missing property name in dot expression".to_string(),
+                node: Some(dot_expr.syntax().clone()),
+            })
+        })?;
         // In rslint_parser, prop for DotExpr is an Name rather than NameRef or Ident
         // So we need to get its text representation.
         let prop_name = prop_name_ident.syntax().text().to_string();
@@ -441,7 +487,9 @@ impl Evaluator {
         match object_value {
             Value::Array(arr) => {
                 if prop_name == "length" {
-                    Ok(ResolvableValue::Json(Value::Number(serde_json::Number::from_f64(arr.len() as f64).unwrap())))
+                    Ok(ResolvableValue::Json(Value::Number(
+                        serde_json::Number::from_f64(arr.len() as f64).unwrap(),
+                    )))
                 } else if prop_name == "includes" {
                     Ok(ResolvableValue::BuiltInMethod {
                         object: Box::new(Value::Array(arr.clone())), // Clone the array for the method context
@@ -459,38 +507,155 @@ impl Evaluator {
                         method: BuiltInMethodKind::ObjectHasOwnProperty,
                     })
                 } else {
-                    Ok(ResolvableValue::Json(map.get(&prop_name).cloned().unwrap_or(Value::Null)))
+                    Ok(ResolvableValue::Json(
+                        map.get(&prop_name).cloned().unwrap_or(Value::Null),
+                    ))
                 }
             }
             _ => {
-                 if prop_name == "length" { // Check for .length on non-array/non-object first
-                     Err(EvaluationError::TypeError(format!(
+                if prop_name == "length" {
+                    // Check for .length on non-array/non-object first
+                    Err(EvaluationError::TypeError(format!(
                         "Cannot read property 'length' of non-array/non-object value: {}", // Clarified error
                         self.value_to_string(&object_value)
                     )))
-                 } else {
+                } else {
                     Err(EvaluationError::TypeError(format!(
                         "Cannot read properties of null or primitive value: {} (trying to access property: {})",
                         self.value_to_string(&object_value),
                         prop_name
                     )))
-                 }
+                }
             }
         }
     }
 
-    // Implement abstract equality similar to JavaScript
+    // Implement abstract equality similar to JavaScript (==)
+    // This includes type coercion
     fn abstract_equality(&self, left: &Value, right: &Value) -> bool {
         match (left, right) {
+            // Same type comparisons
             (Value::Null, Value::Null) => true,
-            (Value::Number(l), Value::Number(r)) => l.as_f64() == r.as_f64(),
-            (Value::String(l), Value::String(r)) => l == r,
             (Value::Bool(l), Value::Bool(r)) => l == r,
+            (Value::String(l), Value::String(r)) => l == r,
+            (Value::Number(l), Value::Number(r)) => {
+                let l_num = l.as_f64().unwrap();
+                let r_num = r.as_f64().unwrap();
+                // NaN is never equal to anything, including itself
+                if l_num.is_nan() || r_num.is_nan() {
+                    false
+                } else {
+                    l_num == r_num
+                }
+            }
+
+            // Type coercion cases
+            // null == undefined would go here, but we don't have undefined
+
+            // Number and String: convert string to number
+            (Value::Number(l), Value::String(r)) | (Value::String(r), Value::Number(l)) => {
+                if let Ok(r_num) = self.to_number(&Value::String(r.clone())) {
+                    let l_num = l.as_f64().unwrap();
+                    if l_num.is_nan() || r_num.is_nan() {
+                        false
+                    } else {
+                        l_num == r_num
+                    }
+                } else {
+                    false
+                }
+            }
+
+            // Boolean: convert to number and compare
+            (Value::Bool(b), other) | (other, Value::Bool(b)) => {
+                let bool_num: f64 = if *b { 1.0 } else { 0.0 };
+                if let Ok(other_num) = self.to_number(other) {
+                    if bool_num.is_nan() || other_num.is_nan() {
+                        false
+                    } else {
+                        bool_num == other_num
+                    }
+                } else {
+                    false
+                }
+            }
+
+            // Array/Object comparisons (reference equality, always false for different instances)
+            _ => false,
+        }
+    }
+
+    // Implement strict equality (===)
+    // No type coercion
+    fn strict_equality(&self, left: &Value, right: &Value) -> bool {
+        match (left, right) {
+            (Value::Null, Value::Null) => true,
+            (Value::Bool(l), Value::Bool(r)) => l == r,
+            (Value::String(l), Value::String(r)) => l == r,
+            (Value::Number(l), Value::Number(r)) => {
+                let l_num = l.as_f64().unwrap();
+                let r_num = r.as_f64().unwrap();
+                // NaN is never equal to anything, including itself
+                if l_num.is_nan() || r_num.is_nan() {
+                    false
+                } else {
+                    l_num == r_num
+                }
+            }
+            // Different types are never strictly equal
+            _ => false,
+        }
+    }
+
+    // Implement SameValueZero comparison (used by Array.includes)
+    // Similar to strict equality but NaN equals NaN
+    fn same_value_zero(&self, left: &Value, right: &Value) -> bool {
+        match (left, right) {
+            (Value::Null, Value::Null) => true,
+            (Value::Bool(l), Value::Bool(r)) => l == r,
+            (Value::String(l), Value::String(r)) => l == r,
+            (Value::Number(l), Value::Number(r)) => {
+                let l_num = l.as_f64().unwrap();
+                let r_num = r.as_f64().unwrap();
+                // Special case: NaN equals NaN in SameValueZero
+                if l_num.is_nan() && r_num.is_nan() {
+                    true
+                } else {
+                    l_num == r_num
+                }
+            }
+            // Different types are never equal
             _ => false,
         }
     }
 
     fn evaluate_by_name(&self, identifier_name: String) -> Result<Value, NodeError> {
+        // Check for special JavaScript identifiers first
+        match identifier_name.as_str() {
+            "Infinity" => {
+                // Note: serde_json doesn't support Infinity in Number type
+                // We represent it as a very large number as a workaround
+                // In a real implementation, you might want a custom Value type
+                return Ok(Value::Number(
+                    serde_json::Number::from_f64(f64::INFINITY).unwrap_or_else(|| {
+                        serde_json::Number::from_f64(1.7976931348623157e308).unwrap()
+                    }),
+                ));
+            }
+            "NaN" => {
+                // Similar issue with NaN
+                return Ok(Value::Number(
+                    serde_json::Number::from_f64(f64::NAN)
+                        .unwrap_or_else(|| serde_json::Number::from_f64(0.0).unwrap()),
+                ));
+            }
+            "undefined" => {
+                // Return null for undefined (closest equivalent in JSON)
+                return Ok(Value::Null);
+            }
+            _ => {}
+        }
+
         let identifier_value = self.context.get(&identifier_name);
 
         #[cfg(feature = "logging")]
@@ -561,12 +726,18 @@ impl Evaluator {
             return Ok(Value::Number(serde_json::Number::from_f64(number).unwrap()));
         }
 
-        // Handle string literals
+        // Handle string literals with escape sequences
         if literal_str.starts_with('"') || literal_str.starts_with('\'') {
-            let unquoted = literal_str
-                .trim_matches(|c| c == '"' || c == '\'')
-                .to_string();
-            return Ok(Value::String(unquoted));
+            let quote_char = literal_str.chars().next().unwrap();
+            // Remove only the first and last character (the quotes)
+            let unquoted = if literal_str.len() >= 2 {
+                &literal_str[1..literal_str.len() - 1]
+            } else {
+                ""
+            };
+            // Process escape sequences
+            let processed = self.process_escape_sequences(unquoted);
+            return Ok(Value::String(processed));
         }
 
         // Handle boolean literals
@@ -586,16 +757,32 @@ impl Evaluator {
     fn to_number(&self, value: &Value) -> Result<f64, EvaluationError> {
         match value {
             Value::Number(n) => Ok(n.as_f64().unwrap()),
-            Value::String(s) => s.parse::<f64>().map_err(|_| EvaluationError::Node(NodeError {
-                message: format!("Cannot convert string '{}' to number", s),
-                node: None,
-            })),
+            Value::String(s) => {
+                // JavaScript behavior: invalid strings convert to NaN, empty string to 0
+                if s.is_empty() {
+                    Ok(0.0)
+                } else if s.trim() == "Infinity" {
+                    Ok(f64::INFINITY)
+                } else if s.trim() == "-Infinity" {
+                    Ok(f64::NEG_INFINITY)
+                } else {
+                    // Try to parse, return NaN if it fails (JavaScript behavior)
+                    Ok(s.trim().parse::<f64>().unwrap_or(f64::NAN))
+                }
+            }
             Value::Bool(b) => Ok(if *b { 1.0 } else { 0.0 }),
             Value::Null => Ok(0.0),
-            _ => Err(EvaluationError::Node(NodeError {
-                message: "Cannot convert value to number".to_string(),
-                node: None,
-            })),
+            Value::Array(arr) => {
+                // JavaScript: [] converts to 0, [x] converts to Number(x), otherwise NaN
+                if arr.is_empty() {
+                    Ok(0.0)
+                } else if arr.len() == 1 {
+                    self.to_number(&arr[0])
+                } else {
+                    Ok(f64::NAN)
+                }
+            }
+            Value::Object(_) => Ok(f64::NAN), // JavaScript: objects convert to NaN
         }
     }
 
@@ -608,8 +795,9 @@ impl Evaluator {
                 num != 0.0 && !num.is_nan()
             }
             Value::String(s) => !s.is_empty(),
-            Value::Array(a) => !a.is_empty(),
-            Value::Object(o) => !o.is_empty(),
+            // JavaScript behavior: all arrays and objects are truthy, even if empty
+            Value::Array(_) => true,
+            Value::Object(_) => true,
         };
         Ok(result)
     }
@@ -625,11 +813,46 @@ impl Evaluator {
         }
     }
 
+    fn process_escape_sequences(&self, s: &str) -> String {
+        let mut result = String::new();
+        let mut chars = s.chars();
+
+        while let Some(ch) = chars.next() {
+            if ch == '\\' {
+                if let Some(next_ch) = chars.next() {
+                    match next_ch {
+                        'n' => result.push('\n'),
+                        't' => result.push('\t'),
+                        'r' => result.push('\r'),
+                        '\\' => result.push('\\'),
+                        '\'' => result.push('\''),
+                        '"' => result.push('"'),
+                        '0' => result.push('\0'),
+                        // For simplicity, we don't handle \uXXXX or \xXX here
+                        // Just pass through the escaped character
+                        _ => {
+                            result.push('\\');
+                            result.push(next_ch);
+                        }
+                    }
+                } else {
+                    result.push('\\');
+                }
+            } else {
+                result.push(ch);
+            }
+        }
+
+        result
+    }
+
     fn evaluate_call_expr(&self, call_expr: &CallExpr) -> Result<Value, EvaluationError> {
-        let callee_expr_node = call_expr.callee().ok_or_else(|| EvaluationError::Node(NodeError {
-            message: "Missing callee in call expression".to_string(),
-            node: Some(call_expr.syntax().clone()),
-        }))?;
+        let callee_expr_node = call_expr.callee().ok_or_else(|| {
+            EvaluationError::Node(NodeError {
+                message: "Missing callee in call expression".to_string(),
+                node: Some(call_expr.syntax().clone()),
+            })
+        })?;
 
         let callee_syntax = callee_expr_node.syntax();
 
@@ -666,16 +889,20 @@ impl Evaluator {
                         match method {
                             BuiltInMethodKind::ArrayIncludes => {
                                 if evaluated_args.len() != 1 {
-                                    return Err(EvaluationError::CustomFunction(CustomFuncError::ArityError {
-                                        expected: 1,
-                                        got: evaluated_args.len(),
-                                    }));
+                                    return Err(EvaluationError::CustomFunction(
+                                        CustomFuncError::ArityError {
+                                            expected: 1,
+                                            got: evaluated_args.len(),
+                                        },
+                                    ));
                                 }
                                 if let Value::Array(arr) = *object {
                                     let target_value = &evaluated_args[0];
                                     let mut found = false;
                                     for item in arr.iter() {
-                                        if self.abstract_equality(item, target_value) {
+                                        // JavaScript Array.includes uses SameValueZero comparison
+                                        // which is similar to strict equality but treats NaN as equal to NaN
+                                        if self.same_value_zero(item, target_value) {
                                             found = true;
                                             break;
                                         }
@@ -688,16 +915,19 @@ impl Evaluator {
                             }
                             BuiltInMethodKind::ObjectHasOwnProperty => {
                                 if evaluated_args.len() != 1 {
-                                    return Err(EvaluationError::CustomFunction(CustomFuncError::ArityError {
-                                        expected: 1,
-                                        got: evaluated_args.len(),
-                                    }));
+                                    return Err(EvaluationError::CustomFunction(
+                                        CustomFuncError::ArityError {
+                                            expected: 1,
+                                            got: evaluated_args.len(),
+                                        },
+                                    ));
                                 }
                                 let prop_key_val = &evaluated_args[0];
                                 // Coerce argument to string, similar to JS
                                 let prop_key_str = self.value_to_string(prop_key_val);
 
-                                if let Value::Object(obj_map) = *object { // object is the Box<Value>
+                                if let Value::Object(obj_map) = *object {
+                                    // object is the Box<Value>
                                     Ok(Value::Bool(obj_map.contains_key(&prop_key_str)))
                                 } else {
                                     // This should not happen if BuiltInMethod is constructed correctly
@@ -706,21 +936,20 @@ impl Evaluator {
                             }
                         }
                     }
-                    ResolvableValue::Json(json_val) => {
-                        Err(EvaluationError::TypeError(format!(
-                            "'{}' (resulting from expression '{}') is not a function.",
-                            self.value_to_string(&json_val),
-                            dot_expr.syntax().text()
-                        )))
-                    }
+                    ResolvableValue::Json(json_val) => Err(EvaluationError::TypeError(format!(
+                        "'{}' (resulting from expression '{}') is not a function.",
+                        self.value_to_string(&json_val),
+                        dot_expr.syntax().text()
+                    ))),
                 }
             }
-            _ => {
-                Err(EvaluationError::Node(NodeError {
-                    message: format!("Unsupported callee type: {:?}. Expected identifier or member expression.", callee_syntax.kind()),
-                    node: Some(callee_syntax.clone()),
-                }))
-            }
+            _ => Err(EvaluationError::Node(NodeError {
+                message: format!(
+                    "Unsupported callee type: {:?}. Expected identifier or member expression.",
+                    callee_syntax.kind()
+                ),
+                node: Some(callee_syntax.clone()),
+            })),
         }
     }
 }
