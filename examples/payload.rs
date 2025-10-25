@@ -2,9 +2,6 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::error::Error;
 
-#[cfg(feature = "logging")]
-use scribe_rust;
-
 pub fn add_context(key: &str, json_str: &str, context: &mut HashMap<String, String>) {
     let json: Value = match serde_json::from_str(json_str) {
         Ok(json) => json,
@@ -85,17 +82,12 @@ pub fn to_json(context: &HashMap<String, String>) -> HashMap<String, serde_json:
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(feature = "logging")]
-    let logger = scribe_rust::Logger::default();
-
     let mut ctx = HashMap::new();
 
     add_context("send_email", r#"{"status": "success"}"#, &mut ctx);
     let engine = exprimo::Evaluator::new(
         to_json(&ctx),
         HashMap::new(), // custom_functions
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     let expr = r#"send_email.status === 'success' "#;

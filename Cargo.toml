@@ -14,12 +14,11 @@ keywords = ["expression", "eval", "js-expression", "js-eval", "javascript"]
 [dependencies]
 anyhow = "~1"
 rslint_parser = "=0.3.1"
-scribe-rust = { version = "~0.2", optional = true }
 serde_json = "~1"
 serde_json_ctx = { version = "0.1.0", optional = true }
 thiserror = "~1"
+tracing = "0.1.41"
 
 [features]
 default = ["serde_json_ctx"]
 serde_json_ctx = ["dep:serde_json_ctx"]
-logging = ["scribe-rust"]

@@ -1,9 +1,6 @@
 use exprimo::Evaluator;
 use std::collections::HashMap;
 
-#[cfg(feature = "logging")]
-use scribe_rust::Logger;
-
 #[cfg(test)]
 #[test]
 fn test_basic_evaluate_with_context() {
@@ -12,14 +9,9 @@ fn test_basic_evaluate_with_context() {
     context.insert("a".to_string(), serde_json::Value::Bool(true));
     context.insert("b".to_string(), serde_json::Value::Bool(false));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
     let evaluator = Evaluator::new(
         context,
         HashMap::new(), // custom_functions
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     let expr1 = "a && b";
@@ -47,14 +39,9 @@ fn test_basic_evaluate_with_nulls() {
     context.insert("a".to_string(), serde_json::Value::Null);
     context.insert("b".to_string(), serde_json::Value::Bool(true));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
     let evaluator = Evaluator::new(
         context,
         HashMap::new(), // custom_functions
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     let expr1 = "a && b";
@@ -120,15 +107,9 @@ fn test_single_quotes_expressions() {
         "a".to_string(),
         serde_json::Value::String("true".to_string()),
     );
-
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
     let evaluator = Evaluator::new(
         context,
         HashMap::new(), // custom_functions
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     let expr1 = "a == 'true'";
@@ -197,14 +178,9 @@ fn test_parenthesized_expressions() {
         serde_json::Value::Number(serde_json::Number::from_f64(4.0).unwrap()),
     );
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
     let evaluator = Evaluator::new(
         context,
         HashMap::new(), // custom_functions
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     // Simple case: (1 + 2) * 3 = 9
@@ -277,14 +253,7 @@ fn test_object_has_own_property_success() {
     ); // Empty string as key
     context.insert("myObj".to_string(), Value::Object(obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator.evaluate("myObj.hasOwnProperty('name')").unwrap(),
@@ -324,14 +293,7 @@ fn test_object_has_own_property_success() {
     );
     context2.insert("objTrueKey".to_string(), Value::Object(obj_with_true_key));
 
-    #[cfg(feature = "logging")]
-    let logger2_true = Logger::default();
-    let evaluator2_true = Evaluator::new(
-        context2.clone(),
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger2_true,
-    );
+    let evaluator2_true = Evaluator::new(context2.clone(), HashMap::new());
 
     assert_eq!(
         evaluator2_true
@@ -357,14 +319,7 @@ fn test_object_has_own_property_success() {
         Value::Object(obj_with_num_key_str),
     );
 
-    #[cfg(feature = "logging")]
-    let logger3_num = Logger::default();
-    let evaluator3_num = Evaluator::new(
-        context3,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger3_num,
-    );
+    let evaluator3_num = Evaluator::new(context3, HashMap::new());
 
     assert_eq!(
         evaluator3_num
@@ -384,14 +339,7 @@ fn test_object_has_own_property_success() {
 fn test_object_has_own_property_arity_error() {
     let mut context = HashMap::new();
     context.insert("myObj".to_string(), Value::Object(serde_json::Map::new()));
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let res_no_args = evaluator.evaluate("myObj.hasOwnProperty()");
     match res_no_args {
@@ -424,14 +372,7 @@ fn test_object_has_own_property_on_non_object() {
     context.insert("myArr".to_string(), Value::Array(vec![]));
     context.insert("myStr".to_string(), Value::String("text".to_string()));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Case 1: Array
     let expr_arr = "myArr.hasOwnProperty('length')";
@@ -472,14 +413,7 @@ fn test_object_has_own_property_nested() {
     outer_obj.insert("nestedObj".to_string(), Value::Object(inner_obj));
     context.insert("item".to_string(), Value::Object(outer_obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator
@@ -508,14 +442,7 @@ fn test_array_includes_success() {
     ]);
     context.insert("myArr".to_string(), arr);
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator.evaluate("myArr.includes(10)").unwrap(),
@@ -558,14 +485,7 @@ fn test_array_includes_success() {
 fn test_array_includes_arity_error() {
     let mut context = HashMap::new();
     context.insert("myArr".to_string(), Value::Array(vec![]));
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let res_no_args = evaluator.evaluate("myArr.includes()");
     match res_no_args {
@@ -596,14 +516,7 @@ fn test_array_includes_arity_error() {
 fn test_array_includes_on_non_array() {
     let mut context = HashMap::new();
     context.insert("notAnArray".to_string(), Value::String("hello".to_string()));
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let result = evaluator.evaluate("notAnArray.includes(1)");
     match result {
@@ -626,14 +539,7 @@ fn test_array_includes_nested() {
     obj.insert("nestedArr".to_string(), arr);
     context.insert("myObj".to_string(), Value::Object(obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator.evaluate("myObj.nestedArr.includes(42)").unwrap(),
@@ -651,15 +557,10 @@ fn test_custom_adder_success() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default(); // Logger is already imported at top level
-
     let evaluator = Evaluator::new(
         // Evaluator is already imported
         context,
         custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
     );
 
     let result = evaluator.evaluate("custom_add(10, 20.5)").unwrap();
@@ -675,15 +576,7 @@ fn test_custom_adder_arity_error_few_args() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, custom_funcs);
 
     let result = evaluator.evaluate("custom_add(10)");
     match result {
@@ -701,15 +594,7 @@ fn test_custom_adder_arity_error_many_args() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, custom_funcs);
 
     let result = evaluator.evaluate("custom_add(10, 20, 30)");
     match result {
@@ -727,15 +612,7 @@ fn test_custom_adder_type_error_arg1() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, custom_funcs);
 
     let result = evaluator.evaluate("custom_add('not_a_number', 10)");
     match result {
@@ -752,15 +629,7 @@ fn test_custom_adder_type_error_arg2() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, custom_funcs);
 
     let result = evaluator.evaluate("custom_add(10, 'not_a_number')");
     match result {
@@ -777,15 +646,7 @@ fn test_custom_adder_non_finite_number_error() {
     let mut custom_funcs: HashMap<String, Arc<dyn CustomFunction>> = HashMap::new();
     custom_funcs.insert("custom_add".to_string(), Arc::new(MyTestAdder));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        custom_funcs,
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, custom_funcs);
 
     // Create a NaN Value::Number (Note: serde_json::Number cannot directly represent NaN/Infinity)
     // This test relies on the internal f64 conversion and check.
@@ -816,14 +677,7 @@ fn test_array_length_direct() {
     let my_array = Value::Array(vec![Value::from(1), Value::from(2), Value::from(3)]);
     context.insert("myArray".to_string(), my_array);
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let result = evaluator.evaluate("myArray.length").unwrap();
     assert_eq!(
@@ -840,14 +694,7 @@ fn test_array_length_nested_in_object() {
     obj.insert("arr".to_string(), my_array);
     context.insert("myObj".to_string(), Value::Object(obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let result = evaluator.evaluate("myObj.arr.length").unwrap();
     assert_eq!(
@@ -866,14 +713,7 @@ fn test_length_on_non_array() {
     context.insert("myObj".to_string(), Value::Object(obj_without_length));
     context.insert("nullVar".to_string(), Value::Null);
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context.clone(),
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger.clone(),
-    );
+    let evaluator = Evaluator::new(context.clone(), HashMap::new());
 
     // String.length is not yet implemented, should fall into the generic "cannot read props of primitive" or specific "length" error
     let res_str = evaluator.evaluate("myString.length");
@@ -920,14 +760,7 @@ fn test_other_property_on_array() {
     let my_array = Value::Array(vec![Value::from(1)]);
     context.insert("myArray".to_string(), my_array);
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let result = evaluator.evaluate("myArray.foo").unwrap();
     assert_eq!(result, Value::Null); // JS returns undefined, so we return Null
@@ -941,14 +774,7 @@ fn test_property_access_on_object() {
     obj.insert("age".to_string(), Value::Number(30.into()));
     context.insert("user".to_string(), Value::Object(obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator.evaluate("user.name").unwrap(),
@@ -970,14 +796,7 @@ fn test_property_access_on_nested_object() {
     outer_obj.insert("nested".to_string(), Value::Object(inner_obj));
     context.insert("item".to_string(), Value::Object(outer_obj));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     assert_eq!(
         evaluator.evaluate("item.nested.value").unwrap(),
@@ -1005,14 +824,7 @@ fn test_property_access_on_null_or_primitive_object_error() {
     context.insert("b".to_string(), Value::Bool(true));
     context.insert("nl".to_string(), Value::Null);
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     let cases = vec!["s.foo", "n.bar", "b.baz", "nl.qux"];
     for case in cases {

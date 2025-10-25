@@ -5,14 +5,6 @@ mod tests {
     use serde_json::Value;
     use std::collections::HashMap;
 
-    #[cfg(feature = "serde_json_ctx")]
-    use serde_json_ctx::ValueExt;
-
-    #[cfg(feature = "logging")]
-    use scribe_rust::Logger;
-    #[cfg(feature = "logging")]
-    use std::sync::Arc;
-
     pub fn add_context(key: &str, json_str: &str, context: &mut HashMap<String, String>) {
         context.insert(key.to_string(), json_str.to_string());
     }
@@ -33,14 +25,9 @@ mod tests {
 
         add_context("event", r#"{}"#, &mut context);
 
-        #[cfg(feature = "logging")]
-        let logger = Logger::default();
-
         let evaluator = Evaluator::new(
             to_json(&context),
             HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
         );
 
         let expr1 = "event.payload === null";
@@ -56,14 +43,9 @@ mod tests {
 
         add_context("send_email", r#"{"status": "success"}"#, &mut context);
 
-        #[cfg(feature = "logging")]
-        let logger = Logger::default();
-
         let evaluator = Evaluator::new(
             to_json(&context),
             HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
         );
 
         let expr1 = "send_email.status === \"success\"";
@@ -91,13 +73,9 @@ mod tests {
             }),
         );
 
-        #[cfg(feature = "logging")]
-        let logger = Logger::default();
         let evaluator = Evaluator::new(
             context.clone().into_iter().collect(),
             HashMap::new(), // custom_functions
-            #[cfg(feature = "logging")]
-            logger,
         );
 
         // Test for event.payload when event is Value::Null

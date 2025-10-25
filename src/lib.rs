@@ -8,13 +8,12 @@ use rslint_parser::{
     SyntaxKind,
     SyntaxNode,
 };
-#[cfg(feature = "logging")]
-use scribe_rust::Logger;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Debug; // For CustomFunction trait
 use std::sync::Arc; // For Arc<dyn CustomFunction>
-use thiserror::Error; // Assuming this is the correct path to Logger
+use thiserror::Error;
+use tracing::trace; // Assuming this is the correct path to Logger
 
 #[derive(Error, Debug)]
 pub enum CustomFuncError {
@@ -79,21 +78,16 @@ pub trait CustomFunction: Debug + Send + Sync {
 pub struct Evaluator {
     context: HashMap<String, Value>,
     custom_functions: HashMap<String, Arc<dyn CustomFunction>>,
-    #[cfg(feature = "logging")]
-    logger: Arc<Logger>, // Ensure Logger is the correct type from scribe_rust
 }
 
 impl Evaluator {
     pub fn new(
         context: HashMap<String, Value>,
         custom_functions: HashMap<String, Arc<dyn CustomFunction>>,
-        #[cfg(feature = "logging")] logger: Arc<Logger>, // Ensure Logger is the correct type
     ) -> Self {
         Evaluator {
             context,
             custom_functions,
-            #[cfg(feature = "logging")]
-            logger,
         }
     }
 
@@ -109,27 +103,24 @@ impl Evaluator {
             }
         };
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
+        trace!(
             "Expression AST:\n\n{:#?}\n-----------------",
             untyped_expr_node
-        ));
+        );
 
         let result = self.evaluate_node(&untyped_expr_node)?;
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!("Result: {}", result));
+        trace!("Result: {}", result);
 
         Ok(result)
     }
 
     fn evaluate_node(&self, node: &SyntaxNode) -> Result<Value, EvaluationError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
+        trace!(
             "Evaluating NodeKind: {:#?}, {:?}",
             node.kind(),
             node.to_string()
-        ));
+        );
 
         let res = match node.kind() {
             SyntaxKind::EXPR_STMT => {
@@ -209,22 +200,13 @@ impl Evaluator {
             })),
         };
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
-            "NodeKind: {:?} => {:#?}",
-            node.kind(),
-            res.as_ref()
-        ));
+        trace!("NodeKind: {:?} => {:#?}", node.kind(), res.as_ref());
 
         res
     }
 
     fn evaluate_bin_expr(&self, bin_expr: &BinExpr) -> Result<Value, EvaluationError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
-            "Evaluating Binary Expression: {:#?}",
-            bin_expr.to_string()
-        ));
+        trace!("Evaluating Binary Expression: {:#?}", bin_expr.to_string());
 
         let left = bin_expr.lhs().ok_or_else(|| NodeError {
             message: "[Empty BinExpr Left Expression]".to_string(),
@@ -240,16 +222,11 @@ impl Evaluator {
 
         let op = bin_expr.op_details();
 
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("BinaryOp left_value {:?}", left_value));
+        trace!("BinaryOp left_value {:?}", left_value);
 
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("BinaryOp right_value {:?}", right_value));
+        trace!("BinaryOp right_value {:?}", right_value);
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!("BinaryOp op_details {:?}", op));
+        trace!("BinaryOp op_details {:?}", op);
 
         let result = match op {
             Some((_, BinOp::Plus)) => self.add_values(left_value, right_value),
@@ -293,8 +270,7 @@ impl Evaluator {
             })),
         }?;
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!("Binary Result: {:?}", result));
+        trace!("Binary Result: {:?}", result);
 
         Ok(result)
     }
@@ -382,11 +358,11 @@ impl Evaluator {
     }
 
     fn evaluate_prefix_expr(&self, prefix_expr: &UnaryExpr) -> Result<Value, EvaluationError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
+        trace!(
             "Evaluating Prefix Expression: {:#?}",
             prefix_expr.to_string()
-        ));
+        );
+
         let expr = prefix_expr.expr().ok_or_else(|| NodeError {
             message: "[Empty PrefixExpr Expression]".to_string(),
             node: Some(prefix_expr.syntax().clone()),
@@ -412,18 +388,16 @@ impl Evaluator {
                 }))
             }
         };
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!("Prefix Result: {:?}", result));
+        trace!("Prefix Result: {:?}", result);
 
         Ok(result)
     }
 
     fn evaluate_cond_expr(&self, cond_expr: &CondExpr) -> Result<Value, EvaluationError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
+        trace!(
             "Evaluating Conditional Expression: {:#?}",
             cond_expr.to_string()
-        ));
+        );
         let cond = cond_expr.test().ok_or_else(|| NodeError {
             message: "[Empty CondExpr Test Expression]".to_string(),
             node: Some(cond_expr.syntax().clone()),
@@ -446,17 +420,13 @@ impl Evaluator {
             self.evaluate_node(false_expr.syntax())? // Returns EvaluationError
         };
 
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("Conditional Result: {:?}", result));
+        trace!("Conditional Result: {:?}", result);
 
         Ok(result)
     }
 
     fn evaluate_dot_expr(&self, dot_expr: &DotExpr) -> Result<ResolvableValue, EvaluationError> {
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("Evaluating Dot Expression: {:#?}", dot_expr));
+        trace!("Evaluating Dot Expression: {:#?}", dot_expr);
 
         let object_expr = dot_expr.object().ok_or_else(|| {
             EvaluationError::Node(NodeError {
@@ -478,11 +448,11 @@ impl Evaluator {
         // Evaluate the object part of the dot expression
         let object_value = self.evaluate_node(object_expr.syntax())?;
 
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
+        trace!(
             "Dot Expression: object_value={:?}, prop_name='{}'",
-            object_value, prop_name
-        ));
+            object_value,
+            prop_name
+        );
 
         match object_value {
             Value::Array(arr) => {
@@ -658,9 +628,7 @@ impl Evaluator {
 
         let identifier_value = self.context.get(&identifier_name);
 
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("Identifier Value: {:#?}", identifier_value));
+        trace!("Identifier Value: {:#?}", identifier_value);
 
         match identifier_value {
             Some(value) => Ok(value.clone()),
@@ -672,9 +640,7 @@ impl Evaluator {
     }
 
     fn evaluate_name(&self, name: &Name) -> Result<Value, NodeError> {
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("Evaluating Name: {:#?}", name.to_string()));
+        trace!("Evaluating Name: {:#?}", name.to_string());
         let identifier_name = name
             .ident_token()
             .ok_or_else(|| NodeError {
@@ -687,11 +653,7 @@ impl Evaluator {
     }
 
     fn evaluate_name_ref(&self, name_ref: &NameRef) -> Result<Value, NodeError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
-            "Evaluating Name Reference: {:#?}",
-            name_ref.to_string()
-        ));
+        trace!("Evaluating Name Reference: {:#?}", name_ref.to_string());
         let identifier_name = name_ref
             .ident_token()
             .ok_or_else(|| NodeError {
@@ -704,20 +666,14 @@ impl Evaluator {
     }
 
     fn evaluate_identifier(&self, identifier: &Expr) -> Result<Value, NodeError> {
-        #[cfg(feature = "logging")]
-        self.logger.trace(&format!(
-            "Evaluating Identifier: {:#?}",
-            identifier.to_string()
-        ));
+        trace!("Evaluating Identifier: {:#?}", identifier.to_string());
         let identifier_name = identifier.to_string();
 
         self.evaluate_by_name(identifier_name)
     }
 
     fn evaluate_literal(&self, literal: &Expr) -> Result<Value, NodeError> {
-        #[cfg(feature = "logging")]
-        self.logger
-            .trace(&format!("Evaluating Literal: {:#?}", literal.to_string()));
+        trace!("Evaluating Literal: {:#?}", literal.to_string());
 
         let literal_str = literal.to_string();
 

@@ -2,24 +2,11 @@ use exprimo::Evaluator;
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[cfg(feature = "logging")]
-use scribe_rust::Logger;
-#[cfg(feature = "logging")]
-use std::sync::Arc;
-
 #[test]
 fn test_division_by_zero_returns_infinity() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Note: serde_json::Number doesn't support Infinity, so we check if the operation succeeds
     // In a real implementation, you might want a custom Value type that supports Infinity
@@ -41,15 +28,7 @@ fn test_nan_from_invalid_string_conversion() {
     let mut context = HashMap::new();
     context.insert("str".to_string(), Value::String("not a number".to_string()));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Invalid string to number conversion should return NaN (not error)
     let result = evaluator.evaluate("str * 2");
@@ -64,15 +43,7 @@ fn test_nan_from_invalid_string_conversion() {
 fn test_nan_comparison() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // NaN should not equal itself with ==
     // Note: Due to serde_json limitations, we check that NaN comparison works
@@ -101,15 +72,7 @@ fn test_nan_comparison() {
 fn test_infinity_support() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Infinity identifier should work
     let result = evaluator.evaluate("Infinity");
@@ -129,15 +92,7 @@ fn test_empty_array_truthiness() {
     let mut context = HashMap::new();
     context.insert("emptyArr".to_string(), Value::Array(vec![]));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Empty array should be truthy (JavaScript behavior)
     let result = evaluator.evaluate("emptyArr ? true : false").unwrap();
@@ -159,15 +114,7 @@ fn test_empty_object_truthiness() {
         Value::Object(serde_json::Map::new()),
     );
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Empty object should be truthy (JavaScript behavior)
     let result = evaluator.evaluate("emptyObj ? true : false").unwrap();
@@ -184,15 +131,7 @@ fn test_empty_object_truthiness() {
 fn test_abstract_equality_type_coercion() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // String to number coercion with ==
     let result = evaluator.evaluate("'5' == 5").unwrap();
@@ -216,15 +155,7 @@ fn test_abstract_equality_type_coercion() {
 fn test_strict_equality_no_coercion() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // String and number should not be strictly equal
     let result = evaluator.evaluate("'5' === 5").unwrap();
@@ -256,15 +187,7 @@ fn test_strict_equality_no_coercion() {
 fn test_string_escape_sequences() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Newline escape
     let result = evaluator.evaluate("'line1\\nline2'").unwrap();
@@ -315,15 +238,7 @@ fn test_string_to_number_conversion() {
     context.insert("emptyStr".to_string(), Value::String("".to_string()));
     context.insert("infStr".to_string(), Value::String("Infinity".to_string()));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Valid number string
     let result = evaluator.evaluate("numStr * 2").unwrap();
@@ -368,15 +283,7 @@ fn test_array_to_number_conversion() {
         Value::Array(vec![Value::Number(1.into()), Value::Number(2.into())]),
     );
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Empty array converts to 0
     let result = evaluator.evaluate("emptyArr * 5").unwrap();
@@ -410,15 +317,7 @@ fn test_array_to_number_conversion() {
 fn test_undefined_identifier() {
     let context = HashMap::new();
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // undefined identifier should work
     let result = evaluator.evaluate("undefined");
@@ -441,15 +340,7 @@ fn test_complex_rule_engine_expressions() {
     context.insert("user_score".to_string(), Value::Number(85.into()));
     context.insert("user_premium".to_string(), Value::Bool(true));
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Complex boolean logic
     let result = evaluator
@@ -495,15 +386,7 @@ fn test_logical_operators_with_new_truthiness() {
         Value::Object(serde_json::Map::new()),
     );
 
-    #[cfg(feature = "logging")]
-    let logger = Logger::default();
-
-    let evaluator = Evaluator::new(
-        context,
-        HashMap::new(),
-        #[cfg(feature = "logging")]
-        logger,
-    );
+    let evaluator = Evaluator::new(context, HashMap::new());
 
     // Empty array in logical AND
     let result = evaluator.evaluate("emptyArr && true").unwrap();
