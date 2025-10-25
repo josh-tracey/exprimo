@@ -79,7 +79,6 @@ dependencies = [
  "anyhow",
  "rslint_parser",
  "serde_json",
- "serde_json_ctx",
  "thiserror",
  "tracing",
 ]
@@ -343,15 +342,6 @@ dependencies = [
  "ryu",
  "serde",
  "serde_core",
-]
-
-[[package]]
-name = "serde_json_ctx"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2046454871df43c9f8893b7a16af6e44c18eb0f7fdee2d62665a763a66d35872"
-dependencies = [
- "serde_json",
 ]
 
 [[package]]
